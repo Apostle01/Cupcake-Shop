@@ -1,0 +1,20 @@
+{% extends 'shop/base.html' %}
+
+{% block content %}
+<h1 class="text-center">Welcome to the Cupcake Shop!</h1>
+<div class="row">
+    {% for cupcake in cupcakes %}
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <img src="{{ cupcake.image.url }}" class="card-img-top" alt="{{ cupcake.name }}">
+            <div class="card-body">
+                <h5 class="card-title">{{ cupcake.name }}</h5>
+                <p class="card-text">{{ cupcake.description }}</p>
+                <p class="text-danger">${{ cupcake.price }}</p>
+                <a href="#" class="btn btn-primary">Order Now</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
