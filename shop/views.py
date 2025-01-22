@@ -11,3 +11,11 @@ def category(request, slug):
     cupcakes = category.cupcakes.all()
     return render(request, 'shop/category.html', {'category': category, 'cupcakes': cupcakes})
 
+def about(request):
+    return render(request, 'about.html')
+
+def contact(request):
+    return render(request, 'contact.html')
+
+def shop(request):
+    return render(request, 'shop.html')
