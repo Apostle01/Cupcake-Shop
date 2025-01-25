@@ -1,3 +1,6 @@
+{% load static %}
+{% load media %}
+
 {% extends 'base.html' %}
 
 {% block title %}Shop - Cupcake Shop{% endblock %}
@@ -9,7 +12,7 @@
     <div class="row">
         <div class="col-md-4">
             <div class="card">
-                <img src="https://via.placeholder.com/300" class="card-img-top" alt="Vanilla Cupcake">
+                <img src="{{ MEDIA_URL }}cupcakes/original_cupcake.jpg" alt="Vanilla Cupcake">
                 <div class="card-body">
                     <h5 class="card-title">Vanilla Cupcake</h5>
                     <p class="card-text">A classic vanilla cupcake topped with creamy frosting.</p>
@@ -19,7 +22,7 @@
         </div>
         <div class="col-md-4">
             <div class="card">
-                <img src="https://via.placeholder.com/300" class="card-img-top" alt="Chocolate Cupcake">
+                <img src="{{ MEDIA_URL }}cupcakes/IMG_0576.JPG" alt="Chocolate Cupcake">
                 <div class="card-body">
                     <h5 class="card-title">Chocolate Cupcake</h5>
                     <p class="card-text">Rich and moist chocolate cupcake with a decadent chocolate ganache.</p>
@@ -29,9 +32,9 @@
         </div>
         <div class="col-md-4">
             <div class="card">
-                <img src="https://via.placeholder.com/300" class="card-img-top" alt="Red Velvet Cupcake">
+                <img src="{{ MEDIA_URL }}cupcakes/IMG_0575.JPG" alt="Pink icing Cupcake">
                 <div class="card-body">
-                    <h5 class="card-title">Red Velvet Cupcake</h5>
+                    <h5 class="card-title">Pink icing Cupcake</h5>
                     <p class="card-text">A delicious red velvet cupcake with cream cheese frosting.</p>
                     <a href="#" class="btn btn-primary">Order Now</a>
                 </div>
