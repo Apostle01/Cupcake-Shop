@@ -12,10 +12,10 @@ def category(request, slug):
     return render(request, 'shop/category.html', {'category': category, 'cupcakes': cupcakes})
 
 def about(request):
-    return render(request, 'about.html')
+    return render(request, 'shop/about.html')
 
 def contact(request):
-    return render(request, 'contact.html')
+    return render(request, 'shop/contact.html')
 
 def shop(request):
-    return render(request, 'shop.html')
+    return render(request, 'shop/shop.html')
