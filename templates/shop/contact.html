@@ -1,19 +1,27 @@
-{% extends 'base.html' %}
+{% extends "shop/base.html" %}
 
-{% block title %}Contact Us - Cupcake Shop{% endblock %}
+{% block title %}Contact Us{% endblock %}
 
 {% block content %}
+<div class="container">
     <h1>Contact Us</h1>
-    <p>If you have any questions or need assistance, feel free to get in touch with us. We'd love to hear from you!</p>
+    <p>If you have any questions or inquiries, feel free to reach out to us!</p>
 
-    <div>
-        <h4>Phone</h4>
-        <p>Call us at: +1 (555) 123-4567</p>
-
-        <h4>Email</h4>
-        <p>Send us an email at: <a href="mailto:contact@cupcakeshop.com">contact@cupcakeshop.com</a></p>
-
-        <h4>Address</h4>
-        <p>Visit us at: 123 Cupcake Street, Sweet City, SC 12345</p>
-    </div>
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="name" class="form-label">Name</label>
+            <input type="text" class="form-control" id="name" name="name" required>
+        </div>
+        <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" class="form-control" id="email" name="email" required>
+        </div>
+        <div class="mb-3">
+            <label for="message" class="form-label">Message</label>
+            <textarea class="form-control" id="message" name="message" rows="4" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Send</button>
+    </form>
+</div>
 {% endblock %}
