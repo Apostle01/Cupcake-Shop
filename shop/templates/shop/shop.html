@@ -1,5 +1,4 @@
 {% load static %}
-{% load media %}
 
 {% extends 'base.html' %}
 
@@ -10,35 +9,17 @@
     <p>Discover our delicious range of cupcakes. Choose from a variety of flavors and designs to make your event unforgettable!</p>
 
     <div class="row">
-        <div class="col-md-4">
-            <div class="card">
-                <img src="{{ MEDIA_URL }}cupcakes/original_cupcake.jpg" alt="Vanilla Cupcake">
-                <div class="card-body">
-                    <h5 class="card-title">Vanilla Cupcake</h5>
-                    <p class="card-text">A classic vanilla cupcake topped with creamy frosting.</p>
-                    <a href="#" class="btn btn-primary">Order Now</a>
+        {% for cupcake in cupcakes %}
+            <div class="col-md-4">
+                <div class="card">
+                    <img src="{{ cupcake.image.url }}" alt="{{ cupcake.name }}">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ cupcake.name }}</h5>
+                        <p class="card-text">{{ cupcake.description }}</p>
+                        <a href="#" class="btn btn-primary">Order Now</a>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card">
-                <img src="{{ MEDIA_URL }}cupcakes/IMG_0576.JPG" alt="Chocolate Cupcake">
-                <div class="card-body">
-                    <h5 class="card-title">Chocolate Cupcake</h5>
-                    <p class="card-text">Rich and moist chocolate cupcake with a decadent chocolate ganache.</p>
-                    <a href="#" class="btn btn-primary">Order Now</a>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card">
-                <img src="{{ MEDIA_URL }}cupcakes/IMG_0575.JPG" alt="Pink icing Cupcake">
-                <div class="card-body">
-                    <h5 class="card-title">Pink icing Cupcake</h5>
-                    <p class="card-text">A delicious red velvet cupcake with cream cheese frosting.</p>
-                    <a href="#" class="btn btn-primary">Order Now</a>
-                </div>
-            </div>
-        </div>
+        {% endfor %}
     </div>
 {% endblock %}

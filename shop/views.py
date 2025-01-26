@@ -18,4 +18,5 @@ def contact(request):
     return render(request, 'shop/contact.html')
 
 def shop(request):
-    return render(request, 'shop/shop.html')
+    cupcakes = Cupcake.objects.all()
+    return render(request, 'shop/shop.html', {'cupcakes': cupcakes})
