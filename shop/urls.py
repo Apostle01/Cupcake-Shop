@@ -8,5 +8,8 @@ urlpatterns = [
     path('contact/', views.contact, name='contact'),  
     path('shop/', views.shop, name='shop'),
     path('add-to-cart/', views.add_to_cart, name='add_to_cart'),
+    path('cart/', views.view_cart, name='view_cart'),
+    path('submit_order/', views.submit_order, name='submit_order'),
+    path('payment_options/', views.payment_options, name='payment_options'),
     # path('', include('shop.urls')),  # Assuming the shop app handles URLs like about, contact, and shop  
 ]
