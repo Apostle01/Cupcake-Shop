@@ -5,6 +5,17 @@ from django.conf import settings
 from django.db import migrations, models
 
 
+def set_default_user(apps, schema_editor):
+    # Get the User model
+    User = apps.get_model(settings.AUTH_USER_MODEL)
+    # Get the Order model
+    Order = apps.get_model('shop', 'Order')
+    # Create or get a placeholder user (adjust as needed)
+    placeholder_user, _ = User.objects.get_or_create(username='placeholder', defaults={'password': 'placeholder'})
+    # Update existing orders with the placeholder user
+    Order.objects.filter(user=None).update(user=placeholder_user)
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -24,8 +35,21 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='order',
             name='user',
-            field=models.ForeignKey(default=None, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
-            preserve_default=False,
+            field=models.ForeignKey(
+                to=settings.AUTH_USER_MODEL,
+                on_delete=django.db.models.deletion.CASCADE,
+                null=True,  # Temporarily allow null values
+            ),
+        ),
+        migrations.RunPython(set_default_user),
+        migrations.AlterField(
+            model_name='order',
+            name='user',
+            field=models.ForeignKey(
+                to=settings.AUTH_USER_MODEL,
+                on_delete=django.db.models.deletion.CASCADE,
+                null=False,  # Make the field non-nullable after default values are set
+            ),
         ),
         migrations.CreateModel(
             name='OrderItem',
