@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Checkout</h2>
+<p>Review your order before proceeding.</p>
+<form method="POST">
+    {% csrf_token %}
+    <button type="submit">Proceed to Payment</button>
+</form>
+{% endblock %}
