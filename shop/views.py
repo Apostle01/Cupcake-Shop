@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .models import Cupcake, Cart, CartItem, Order
+from .models import Cupcake, Cart, CartItem, Order, Category
 from .forms import PaymentForm
 
 # ✅ Home Page
@@ -67,3 +67,11 @@ def payment_options(request):
         form = PaymentForm()
     
     return render(request, 'shop/payment_options.html', {'form': form})
+
+def category(request, slug):
+    category = get_object_or_404(Category, slug=slug)
+    cupcakes = category.cupcake_set.all()
+    return render(request, 'shop/category.html', {'category': category, 'cupcakes': cupcakes})
+
+def about(request):
+    return render(request, 'shop/about.html')
