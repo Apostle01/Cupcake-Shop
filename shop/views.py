@@ -4,6 +4,7 @@ from django.contrib import messages
 from .models import Cupcake, Cart, CartItem, Order, Category
 from .forms import PaymentForm
 
+
 # ✅ Home Page
 def index(request):
     cupcakes = Cupcake.objects.all()
@@ -75,3 +76,30 @@ def category(request, slug):
 
 def about(request):
     return render(request, 'shop/about.html')
+
+def contact(request):
+    return render(request, 'shop/contact.html')
+
+def shop(request):
+    cupcakes = Cupcake.objects.all()
+    return render(request, 'shop/shop.html', {'cupcakes': cupcakes})
+
+
+def submit_order(request):
+    if request.method == 'POST':
+        cart_items = request.session.get('cart', {})
+        if not cart_items:
+            messages.error(request, "Your cart is empty!")
+            return redirect('view_cart')
+
+        order = Order.objects.create(user=request.user)
+        for cupcake_id, quantity in cart_items.items():
+            cupcake = get_object_or_404(Cupcake, id=cupcake_id)
+            order.items.create(cupcake=cupcake, quantity=quantity)
+
+        request.session['cart'] = {}  # Clear the cart after order placement
+        messages.success(request, "Your order has been placed successfully!")
+        return redirect('payment_options')
+
+    return redirect('view_cart')
+

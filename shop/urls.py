@@ -15,3 +15,4 @@ urlpatterns = [
     path('submit_order/', views.submit_order, name='submit_order'),
     path('payment_options/', views.payment_options, name='payment_options'),
 ]
+
