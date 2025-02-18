@@ -33,7 +33,7 @@ def add_to_cart(request):
 @login_required
 def view_cart(request):
     cart, created = Cart.objects.get_or_create(user=request.user)
-    items = cart.cartitem_set.all()
+    items = cart.items.all()
     
     total_price = sum(item.cupcake.price * item.quantity for item in items)
     
@@ -43,13 +43,13 @@ def view_cart(request):
 @login_required
 def checkout(request):
     cart, created = Cart.objects.get_or_create(user=request.user)
-    items = cart.cartitem_set.all()
+    items = cart.items.all()
 
     if request.method == "POST":
         order = Order.objects.create(user=request.user)
         for item in items:
             order.items.add(item.cupcake)
-        cart.cartitem_set.all().delete()  # Empty cart after order
+        cart.items.all().delete()  # Empty cart after order
         messages.success(request, "Order placed successfully!")
         return redirect('payment_options')
     
