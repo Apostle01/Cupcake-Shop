@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from .views import custom_login
 
 urlpatterns = [
     path('', views.index, name='index'),
@@ -14,5 +15,6 @@ urlpatterns = [
     path('checkout/', views.checkout, name='checkout'),
     path('submit_order/', views.submit_order, name='submit_order'),
     path('payment_options/', views.payment_options, name='payment_options'),
+    path('login/', custom_login, name='login'),  
 ]
 
