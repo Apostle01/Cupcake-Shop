@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
 from django.contrib import messages
-from .models import Cupcake, Cart, CartItem, Review
+from .models import Cupcake, Cart, CartItem, Review, Category
 from django.db.models import Avg
 
 @login_required
@@ -81,3 +81,10 @@ def custom_login(request):
 
 def index(request):
     return render(request, 'shop/index.html')
+
+def category(request, slug):
+    category = get_object_or_404(Category, slug=slug)
+    return render(request, 'shop/category.html', {'category': category})
+
+def about(request):
+    return render(request, 'shop/about.html')
