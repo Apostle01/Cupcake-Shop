@@ -1,0 +1,85 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Shop Now - Cupcake Shop</title>
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/font-awesome.min.css' %}">
+</head>
+<body>
+
+<!-- Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="#">Cupcake Shop</a>
+</nav>
+
+<!-- Categories Section -->
+<section class="container mt-4">
+    <h2 class="text-center">Categories</h2>
+    <div class="row">
+        {% for category in categories %}
+            <div class="col-md-4">
+                <div class="card">
+                    <img src="{{ category.image.url }}" class="card-img-top" alt="{{ category.name }}">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ category.name }}</h5>
+                        <p class="card-text">{{ category.description }}</p>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- Cupcakes Section -->
+<section class="container mt-4">
+    <h2 class="text-center">Our Cupcakes</h2>
+    <div class="row">
+        {% for cupcake in cupcakes %}
+            <div class="col-md-4">
+                <div class="card">
+                    <img src="{{ cupcake.image.url }}" class="card-img-top" alt="{{ cupcake.name }}">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ cupcake.name }}</h5>
+                        <p class="card-text">Price: ${{ cupcake.price }}</p>
+                        <button class="btn btn-primary">
+                            <i class="fa fa-shopping-cart"></i> Add to Cart
+                        </button>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- Orders Section -->
+<section class="container mt-4">
+    <h2 class="text-center">Recent Orders</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Total Price</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+                <tr>
+                    <td>{{ order.id }}</td>
+                    <td>{{ order.customer.name }}</td>
+                    <td>${{ order.total_price }}</td>
+                    <td><span class="badge bg-success">{{ order.status }}</span></td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+
+<!-- Bootstrap JS -->
+<script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>
