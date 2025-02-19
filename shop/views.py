@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
 from django.contrib import messages
-from .models import Cupcake, Cart, CartItem, Review, Category
+from .models import Cupcake, Cart, CartItem, Review, Category, Product
 from django.db.models import Avg
 
 @login_required
@@ -76,8 +76,19 @@ def add_review(request, cupcake_id):
     
     return render(request, "shop/add_review.html", {"cupcake": cupcake, "existing_review": existing_review})
 
+from django.contrib.auth import login
+from django.shortcuts import render, redirect
+from django.contrib.auth.forms import AuthenticationForm
+
 def custom_login(request):
-    return LoginView.as_view()(request)
+    if request.method == 'POST':
+        form = AuthenticationForm(data=request.POST)
+        if form.is_valid():
+            login(request, form.get_user())
+            return redirect('index')
+    else:
+        form = AuthenticationForm()
+    return render(request, 'shop/login.html', {'form': form})
 
 def index(request):
     return render(request, 'shop/index.html')
@@ -88,3 +99,6 @@ def category(request, slug):
 
 def about(request):
     return render(request, 'shop/about.html')
+
+def contact(request):
+    return render(request, 'shop/contact.html')
