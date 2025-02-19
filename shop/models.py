@@ -60,3 +60,14 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return f"{self.quantity} x {self.cupcake.name}"
+    
+
+class Review(models.Model):
+    cupcake = models.ForeignKey(Cupcake, on_delete=models.CASCADE, related_name="reviews")
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    rating = models.IntegerField(default=5)
+    comment = models.TextField(blank=True)
+    created_at = models.DATETimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Review by {self.user.username} for {self.cupcake.name}"  
