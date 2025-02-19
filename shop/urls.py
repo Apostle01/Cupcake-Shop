@@ -7,8 +7,8 @@ urlpatterns = [
     path('category/<slug:slug>/', views.category, name='category'),
     path('about/', views.about, name='about'),  
     path('contact/', views.contact, name='contact'),  
-    path('shop/', views.shop, name='shop'),
-    path('', views.shop_now, name='shop_now'),
+    # path('shop/', views.shop, name='shop'),
+    path('', views.shop_now, name='shop_now'), # set as home page
     
     # Cart & Checkout URLs
     path('add-to-cart/', views.add_to_cart, name='add_to_cart'),
