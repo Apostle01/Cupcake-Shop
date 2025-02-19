@@ -111,3 +111,12 @@ def contact(request):
 def shop(request):
     products = Product.objects.all()  # Fetch all products
     return render(request, 'shop/shop.html', {'products': products})
+
+def checkout(request):
+    return render(request, 'shop/checkout.html')
+
+def submit_order(request):
+    return render(request, 'shop/submit_order')
+
+def payment_options(request):
+    return render(request, 'payment_options')
