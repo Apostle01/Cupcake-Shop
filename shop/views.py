@@ -88,3 +88,18 @@ def category(request, slug):
 
 def about(request):
     return render(request, 'shop/about.html')
+
+def contact(request):
+    return render(request, 'shop/contact.html')
+
+def shop(request):
+    return render(request, 'shop/shop.html')
+
+def checkout(request):
+    return render(request, 'shop/checkout.html')
+
+def submit_order(request):
+    return render(request, 'shop/submit_order.html')
+
+def payment_options(request):
+    return render(request, 'shop/payment_options.html')
