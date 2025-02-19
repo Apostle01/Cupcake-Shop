@@ -5,6 +5,11 @@ from django.contrib import messages
 from .models import Cupcake, Cart, CartItem, Review, Category, Product
 from django.db.models import Avg
 
+def some_view(request):
+    from .models import Product  # Import locally
+    products = Product.objects.all()
+    return render(request, 'shop/shop.html', {'products': products})
+
 @login_required
 def add_to_cart(request, cupcake_id):
     cupcake = get_object_or_404(Cupcake, id=cupcake_id)
@@ -102,3 +107,7 @@ def about(request):
 
 def contact(request):
     return render(request, 'shop/contact.html')
+
+def shop(request):
+    products = Product.objects.all()  # Fetch all products
+    return render(request, 'shop/shop.html', {'products': products})
