@@ -2,8 +2,14 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
 from django.contrib import messages
-from .models import Cupcake, Cart, CartItem, Review, Category
+from .models import Cupcake, Cart, CartItem, Review, Category, Product
 from django.db.models import Avg
+
+#from .models import Product  # Ensure Product model is imported
+
+def shop_now(request):
+    products = Product.objects.all()  # Fetch all products
+    return render(request, 'shop/product.html', {'products': products})
 
 @login_required
 def add_to_cart(request, cupcake_id):
