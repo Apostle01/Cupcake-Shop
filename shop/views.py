@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.views import LoginView
 from django.contrib import messages
 from .models import Cupcake, Cart, CartItem, Review
 from django.db.models import Avg
@@ -74,3 +75,9 @@ def add_review(request, cupcake_id):
         return redirect("product_detail", cupcake_id=cupcake.id)
     
     return render(request, "shop/add_review.html", {"cupcake": cupcake, "existing_review": existing_review})
+
+def custom_login(request):
+    return LoginView.as_view()(request)
+
+def index(request):
+    return render(request, 'shop/index.html')
