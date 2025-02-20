@@ -5,12 +5,12 @@ from django.contrib import messages
 from .models import Cupcake, Cart, CartItem, Review, Category, Product
 from django.db.models import Avg
 
-def shop(request):
+def shop_now(request):
     products = Product.objects.all()  # Fetch all products
-    return render(request, 'shop/shop.html', {'products': products})
+    return render(request, 'shop/home.html', {'products': products})
 
-# def shop_now(request):
-#     return render(request, 'shop/shop.html')  # Ensure this template exists
+def home(request):
+    return render(request, 'shop/shop.html')  # Ensure this template exists
 
 
 @login_required
@@ -87,9 +87,6 @@ def add_review(request, cupcake_id):
 def custom_login(request):
     return LoginView.as_view()(request)
 
-# def index(request):
-#     return render(request, 'shop/index.html')
-
 def category(request, slug):
     category = get_object_or_404(Category, slug=slug)
     products = Product.objects.filter(category=category)
@@ -142,5 +139,5 @@ def custom_login(request):
         form = AuthenticationForm()
     return render(request, 'shop/login.html', {'form': form})
 
-def contact(request):
-    return render(request, 'shop/contact.html')
+# def contact(request):
+#     return render(request, 'shop/contact.html')

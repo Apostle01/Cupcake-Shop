@@ -3,9 +3,8 @@ from . import views
 from .views import custom_login
 
 urlpatterns = [
-    path('', views.shop, name='shop'),  # Ensuring correct view function is called
-    # path('shop_now/', views.shop_now, name='shop_now'),  # Add this if needed
-    # path('', views.index, name='index'),
+    path('', views.home, name='home'),  # Ensuring correct view function is called
+    path('shop/', views.shop_now, name='shop'),  # Add this if needed
     path('category/<slug:slug>/', views.category, name='category'),
     path('about/', views.about, name='about'),  
     path('contact/', views.contact, name='contact'), 
