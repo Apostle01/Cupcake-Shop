@@ -87,8 +87,8 @@ def add_review(request, cupcake_id):
 def custom_login(request):
     return LoginView.as_view()(request)
 
-def index(request):
-    return render(request, 'shop/index.html')
+# def index(request):
+#     return render(request, 'shop/index.html')
 
 def category(request, slug):
     category = get_object_or_404(Category, slug=slug)
