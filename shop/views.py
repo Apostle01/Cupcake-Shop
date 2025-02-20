@@ -7,9 +7,9 @@ from django.db.models import Avg
 
 #from .models import Product  # Ensure Product model is imported
 
-def shop_now(request):
-    products = Product.objects.all()  # Fetch all products
-    return render(request, 'shop/product.html', {'products': products})
+# def shop(request):
+#     products = Product.objects.all()  # Fetch all products
+#     return render(request, 'shop/product.html', {'products': products})
 
 @login_required
 def add_to_cart(request, cupcake_id):
@@ -99,9 +99,9 @@ def about(request):
 def contact(request):
     return render(request, 'shop/contact.html')
 
-# def shop(request):
-#     products = Product.objects.all()
-#     return render(request, 'shop/shop.html', {'products': products})
+def shop(request):
+    products = Product.objects.all()
+    return render(request, 'shop/shop.html', {'products': products})
 
 # Cart & Checkout
 def view_cart(request):
