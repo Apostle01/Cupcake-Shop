@@ -62,6 +62,21 @@ def update_cart(request, item_id):
             messages.success(request, "Item removed from cart.")
     return redirect("view_cart")
 
+@login_required
+def submit_order(request):
+    cart, _ = Cart.objects.get_or_create(user=request.user)
+    items = cart.items.all()
+    
+    if not items:
+        messages.error(request, "Your cart is empty. Add items before submitting an order.")
+        return redirect("view_cart")
+    
+    # Simulate order submission (this is where you integrate payment processing)
+    cart.items.all().delete()  # Clear cart after submission
+    messages.success(request, "Your order has been successfully placed!")
+
+    return redirect("home")  # Redirect to homepage or order confirmation page
+
 # ---------------- Checkout ----------------
 
 @login_required
@@ -78,6 +93,9 @@ def checkout(request):
     
     return render(request, "shop/checkout.html", {"cart": cart, "items": items, "total_price": total_price})
 
+@login_required
+def payment_options(request):
+    return render(request, "shop/payment_options.html")
 # ---------------- Review System ----------------
 
 @login_required
