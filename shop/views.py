@@ -28,18 +28,23 @@ def view_cart(request):
     total_price = sum(item.cupcake.price * item.quantity for item in items)
     return render(request, "shop/cart.html", {"cart": cart, "items": items, "total_price": total_price})
 
-@login_required
 def add_to_cart(request, cupcake_id):
     cupcake = get_object_or_404(Cupcake, id=cupcake_id)
-    cart, _ = Cart.objects.get_or_create(user=request.user)
     
+    # Ensure the user is authenticated
+    if not request.user.is_authenticated:
+        messages.error(request, "You must be logged in to add items to the cart.")
+        return redirect("login")  # Change to your login page name
+    
+    cart, _ = Cart.objects.get_or_create(user=request.user)
     cart_item, created = CartItem.objects.get_or_create(cart=cart, cupcake=cupcake)
+    
     if not created:
         cart_item.quantity += 1
         cart_item.save()
-    
+
     messages.success(request, f"{cupcake.name} added to cart!")
-    return redirect("view_cart")
+    return redirect("shop")  # Change to the correct redirect page
 
 @login_required
 def remove_from_cart(request, item_id):
