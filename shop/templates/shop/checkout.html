@@ -1,9 +1,21 @@
 {% extends "base.html" %}
+{% block title %}Checkout - Cupcake Shop{% endblock %}
+
 {% block content %}
-<h2>Checkout</h2>
-<p>Review your order before proceeding.</p>
-<form method="POST">
-    {% csrf_token %}
-    <button type="submit">Proceed to Payment</button>
-</form>
+<div class="container">
+    <h2>Checkout</h2>
+    <form method="post" action="{% url 'process_checkout' %}">
+        {% csrf_token %}
+        <label>Name:</label>
+        <input type="text" name="name" class="form-control" required>
+
+        <label>Email:</label>
+        <input type="email" name="email" class="form-control" required>
+
+        <label>Address:</label>
+        <textarea name="address" class="form-control" required></textarea>
+
+        <button type="submit" class="btn btn-success mt-3">Complete Order</button>
+    </form>
+</div>
 {% endblock %}

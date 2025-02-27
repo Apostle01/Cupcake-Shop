@@ -2,16 +2,31 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
 from django.contrib import messages
+from django.contrib.auth import login
+from django.contrib.auth.forms import AuthenticationForm
 from .models import Cupcake, Cart, CartItem, Review, Category, Product
 from django.db.models import Avg
 
+def home(request):
+    cupcakes = Cupcake.objects.all()  # Fetch all cupcakes
+    return render(request, 'shop/home.html', {'cupcakes': cupcakes})
+
+def shop(request):
+    cupcakes = Cupcake.objects.all()
+    return render(request, 'shop/shop.html', {'cupcakes': cupcakes})
+
 def shop_now(request):
     products = Product.objects.all()  # Fetch all products
-    return render(request, 'shop/home.html', {'products': products})
+    return render(request, 'shop/shop.html', {'products': products})
 
-def home(request):
-    return render(request, 'shop/shop.html')  # Ensure this template exists
+# ---------------- Cart Management ----------------
 
+@login_required
+def view_cart(request):
+    cart, _ = Cart.objects.get_or_create(user=request.user)
+    items = cart.items.all()
+    total_price = sum(item.cupcake.price * item.quantity for item in items)
+    return render(request, "shop/cart.html", {"cart": cart, "items": items, "total_price": total_price})
 
 @login_required
 def add_to_cart(request, cupcake_id):
@@ -47,12 +62,23 @@ def update_cart(request, item_id):
             messages.success(request, "Item removed from cart.")
     return redirect("view_cart")
 
+# ---------------- Checkout ----------------
+
 @login_required
-def view_cart(request):
+def checkout(request):
     cart, _ = Cart.objects.get_or_create(user=request.user)
     items = cart.items.all()
     total_price = sum(item.cupcake.price * item.quantity for item in items)
-    return render(request, "shop/cart.html", {"cart": cart, "items": items, "total_price": total_price})
+    
+    if request.method == "POST":
+        # Placeholder for checkout logic (e.g., payment processing)
+        cart.items.all().delete()
+        messages.success(request, "Order placed successfully!")
+        return redirect("home")
+    
+    return render(request, "shop/checkout.html", {"cart": cart, "items": items, "total_price": total_price})
+
+# ---------------- Review System ----------------
 
 @login_required
 def add_review(request, cupcake_id):
@@ -84,8 +110,19 @@ def add_review(request, cupcake_id):
     
     return render(request, "shop/add_review.html", {"cupcake": cupcake, "existing_review": existing_review})
 
+# ---------------- Authentication ----------------
+
 def custom_login(request):
-    return LoginView.as_view()(request)
+    if request.method == 'POST':
+        form = AuthenticationForm(data=request.POST)
+        if form.is_valid():
+            login(request, form.get_user())
+            return redirect('home')
+    else:
+        form = AuthenticationForm()
+    return render(request, 'shop/login.html', {'form': form})
+
+# ---------------- Category & Information Pages ----------------
 
 def category(request, slug):
     category = get_object_or_404(Category, slug=slug)
@@ -97,47 +134,3 @@ def about(request):
 
 def contact(request):
     return render(request, 'shop/contact.html')
-
-
-# Cart & Checkout
-def view_cart(request):
-    return render(request, 'shop/cart.html')
-
-def add_to_cart(request, cupcake_id):
-    return render(request, 'shop/add_to_cart.html', {'cupcake_id': cupcake_id})
-
-def remove_from_cart(request, item_id):
-    return render(request, 'shop/remove_from_cart.html', {'item_id': item_id})
-
-def update_cart(request, item_id):
-    return render(request, 'shop/update_cart.html', {'item_id': item_id})
-
-def checkout(request):
-    return render(request, 'shop/checkout.html')
-
-def submit_order(request):
-    return render(request, 'shop/submit_order.html')
-
-def payment_options(request):
-    return render(request, 'shop/payment_options.html')
-
-# Review
-def add_review(request, cupcake_id):
-    return render(request, 'shop/add_review.html', {'cupcake_id': cupcake_id})
-
-# Authentication
-from django.contrib.auth import login
-from django.contrib.auth.forms import AuthenticationForm
-
-def custom_login(request):
-    if request.method == 'POST':
-        form = AuthenticationForm(data=request.POST)
-        if form.is_valid():
-            login(request, form.get_user())
-            return redirect('index')
-    else:
-        form = AuthenticationForm()
-    return render(request, 'shop/login.html', {'form': form})
-
-# def contact(request):
-#     return render(request, 'shop/contact.html')

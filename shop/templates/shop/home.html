@@ -5,53 +5,34 @@
 
 {% block content %}
 <div class="container text-center">
-    <h1 class="mt-4">Welcome to Cupcake Shop</h1>
+    <h1>Welcome to Cupcake Shop</h1>
     <p>Delicious cupcakes for every occasion!</p>
 
-    <!-- Hero Section with Carousel -->
-    <div id="cupcakeCarousel" class="carousel slide mt-4" data-bs-ride="carousel">
-        <div class="carousel-inner">
-            {% for cupcake in cupcakes|slice:":3" %}
-            <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                <img src="{{ cupcake.image.url }}" class="d-block w-100 rounded" alt="{{ cupcake.name }}">
-            </div>
-            {% endfor %}
-        </div>
-        <button class="carousel-control-prev" type="button" data-bs-target="#cupcakeCarousel" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon"></span>
-        </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#cupcakeCarousel" data-bs-slide="next">
-            <span class="carousel-control-next-icon"></span>
-        </button>
-    </div>
-
-    <!-- Featured Cupcakes -->
-    <h2 class="mt-5">Our Bestsellers</h2>
-    <div class="row">
+    <!-- Cupcake Images Section -->
+    <div class="row mt-4">
         {% for cupcake in cupcakes %}
         <div class="col-md-4">
-            <div class="card shadow-sm mb-4">
-                <img src="{{ cupcake.image.url }}" class="card-img-top" alt="{{ cupcake.name }}">
+            <div class="card">
+                <img src="{{ cupcake.image.url }}" class="card-img-top img-fluid rounded shadow" alt="{{ cupcake.name }}">
                 <div class="card-body">
                     <h5 class="card-title">{{ cupcake.name }}</h5>
                     <p class="card-text">{{ cupcake.description }}</p>
-                    <p class="text-success fw-bold">${{ cupcake.price }}</p>
+                    <p class="price">${{ cupcake.price }}</p>
                     <form method="post" action="{% url 'add_to_cart' %}">
                         {% csrf_token %}
                         <input type="hidden" name="cupcake_id" value="{{ cupcake.id }}">
-                        <label for="quantity-{{ cupcake.id }}">Quantity:</label>
-                        <input type="number" name="quantity" id="quantity-{{ cupcake.id }}" value="1" min="1" class="form-control">
-                        <button type="submit" class="btn btn-primary mt-2 w-100">Add to Cart</button>
+                        <input type="number" name="quantity" value="1" min="1" class="form-control">
+                        <button type="submit" class="btn btn-primary mt-2">Add to Cart</button>
                     </form>
                 </div>
             </div>
         </div>
         {% empty %}
-        <p class="mt-3">No cupcakes available at the moment.</p>
+        <p>No cupcakes available at the moment.</p>
         {% endfor %}
     </div>
 
     <!-- Call to Action Button -->
-    <a href="{% url 'shop' %}" class="btn btn-lg btn-success mt-4">Shop Now</a>
+    <a href="{% url 'shop' %}" class="btn btn-primary mt-4">Shop Now</a>
 </div>
 {% endblock %}

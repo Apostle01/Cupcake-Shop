@@ -12,7 +12,7 @@ urlpatterns = [
     
     # Cart & Checkout URLs
     path('add-to-cart/', views.add_to_cart, name='add_to_cart'),
-    path('cart/', views.view_cart, name='view_cart'),
+    path('cart/', views.view_cart, name='cart'),
     path('checkout/', views.checkout, name='checkout'),
     path('submit_order/', views.submit_order, name='submit_order'),
     path('payment_options/', views.payment_options, name='payment_options'),
