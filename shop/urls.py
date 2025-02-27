@@ -17,6 +17,7 @@ urlpatterns = [
     path('submit_order/', views.submit_order, name='submit_order'),
     path('payment_options/', views.payment_options, name='payment_options'),
     path('login/', custom_login, name='login'),
-    path('add_review', views.add_review, name='add_review'),  
+    path('add_review', views.add_review, name='add_review'),
+    path('add-to-cart/<int:cupcake_id>/', views.add_to_cart, name='add_to_cart'),  
 ]
 
