@@ -157,3 +157,7 @@ def about(request):
 
 def contact(request):
     return render(request, 'shop/contact.html')
+
+@login_required
+def payment_options(request):
+    return render(request, "shop/payment_options.html")
