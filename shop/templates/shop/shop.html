@@ -18,10 +18,8 @@
                     <form action="{% url 'add_to_cart' cupcake.id %}" method="POST">
                         {% csrf_token %}
                         <input type="hidden" name="cupcake_id" value="{{ cupcake.id }}">
-                        <label for="quantity-{{ cupcake.id }}">Quantity:</label>
-                        <input type="number" name="quantity" id="quantity-{{ cupcake.id }}" value="1" min="1" class="form-control">
-                        <button type="submit" class="btn btn-primary mt-2 w-100">Add to Cart</button>
-                    </form>                    
+                        <button type="submit">Add to Cart</button>
+                    </form>                                        
                 </div>
             </div>
         </div>
