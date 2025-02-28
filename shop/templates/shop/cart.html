@@ -2,6 +2,7 @@
 {% block title %}Your Shopping Cart | Cupcake Shop{% endblock %}
 
 {% block content %}
+{% load custom_filters %}  <!-- Load the custom filters -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -23,7 +24,6 @@
         .btn-sm { margin: 2px; } /* Added for better button spacing */
     </style>
 </head>
-{% load custom_filters %}  <!-- Load the custom filters -->
 <body>
     <div class="container">
         <div class="cart-container p-4">
