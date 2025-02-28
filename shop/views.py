@@ -91,13 +91,11 @@ def checkout(request):
     total_price = sum(item.cupcake.price * item.quantity for item in items)
     
     if request.method == "POST":
-        # Placeholder for checkout logic (e.g., payment processing)
-        cart.items.all().delete()
+        cart.items.all().delete()  # Ensure cart is cleared after checkout
         messages.success(request, "Order placed successfully!")
-        return redirect("home")
+        return redirect("home")  # Redirect after checkout
     
     return render(request, "shop/checkout.html", {"cart": cart, "items": items, "total_price": total_price})
-
 @login_required
 def payment_options(request):
     return render(request, "shop/payment_options.html")

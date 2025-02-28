@@ -1,28 +1,28 @@
 from django.urls import path
-from . import views
-from .views import custom_login, view_cart, update_cart  # Import the view
+from . import views  # Import views correctly
 
 urlpatterns = [
-    path('', views.home, name='home'),  # Ensuring correct view function is called
+    # General pages
+    path('', views.home, name='home'),
     path('shop/', views.shop, name='shop'),
     path('category/<slug:slug>/', views.category, name='category'),
-    path('about/', views.about, name='about'),  
-    path('contact/', views.contact, name='contact'), 
-    
-    
-    # Cart & Checkout URLs
-    path('cart/', views.view_cart, name='cart'),
+    path('about/', views.about, name='about'),
+    path('contact/', views.contact, name='contact'),  
+
+    # Cart & Checkout
+    path('cart/', views.view_cart, name='view_cart'),  # Fixed duplicate name
     path('checkout/', views.checkout, name='checkout'),
     path('submit_order/', views.submit_order, name='submit_order'),
     path('payment_options/', views.payment_options, name='payment_options'),
-    path('login/', custom_login, name='login'),
-    path('add_review', views.add_review, name='add_review'),
-    path('add-to-cart/<int:cupcake_id>/', views.add_to_cart, name='add_to_cart'), 
-    path('cart/', view_cart, name='cart'),
-    path('cart/update/<int:item_id>/', update_cart, name='update_cart'),  # Ensure this exists
+
+    # Authentication
+    path('login/', views.custom_login, name='login'),
+
+    # Reviews
+    path('add_review/<int:cupcake_id>/', views.add_review, name='add_review'),  # Fixed missing ID
+
+    # Cart Management
+    path('add-to-cart/<int:cupcake_id>/', views.add_to_cart, name='add_to_cart'),
+    path('cart/update/<int:item_id>/', views.update_cart, name='update_cart'),  
+    path('cart/remove/<int:item_id>/', views.remove_from_cart, name='remove_from_cart'),  # Missing remove function
 ]
- 
-
-
-
-
