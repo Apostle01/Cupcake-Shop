@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Your Orders | Cupcake Shop{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="orders-container p-4">
+        <h2 class="text-center mb-4"><i class="fa-solid fa-box"></i> Your Orders</h2>
+
+        {% if orders %}
+            <table class="table table-bordered text-center">
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Date</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr>
+                        <td>{{ order.id }}</td>
+                        <td>{{ order.created_at|date:"F j, Y" }}</td>
+                        <td>${{ order.total_price|floatformat:2 }}</td>
+                        <td>{{ order.get_status_display }}</td>
+                        <td>
+                            <a href="{% url 'order_detail' order.id %}" class="btn btn-primary btn-sm">
+                                <i class="fa-solid fa-eye"></i> View Details
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="alert alert-info text-center">
+                You have no orders yet. <a href="{% url 'shop' %}" class="alert-link">Start shopping!</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

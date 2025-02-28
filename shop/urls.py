@@ -8,7 +8,8 @@ urlpatterns = [
     path('category/<slug:slug>/', views.category, name='category'),
     path('about/', views.about, name='about'),
     path('contact/', views.contact, name='contact'),  
-
+    path('orders/', views.view_orders, name='view_orders'),
+    
     # Cart & Checkout
     path('cart/', views.view_cart, name='view_cart'),  # Fixed duplicate name
     path('checkout/', views.checkout, name='checkout'),

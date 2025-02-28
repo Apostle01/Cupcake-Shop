@@ -4,7 +4,7 @@ from django.contrib.auth.views import LoginView
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.forms import AuthenticationForm
-from .models import Cupcake, Cart, CartItem, Review, Category, Product
+from .models import Cupcake, Cart, CartItem, Review, Category, Product, Order
 from django.db.models import Avg
 
 # ---------------- Home & Shop Views ----------------
@@ -22,6 +22,11 @@ def shop_now(request):
     return render(request, 'shop/shop.html', {'products': products})
 
 # ---------------- Cart Management ----------------
+@login_required  # Ensure only logged-in users can view orders
+def view_orders(request):
+    # Fetch orders for the current user
+    orders = Order.objects.filter(user=request.user).order_by('-created_at')
+    return render(request, 'shop/orders.html', {'orders': orders})
 
 @login_required
 def view_cart(request):
