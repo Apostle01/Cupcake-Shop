@@ -7,6 +7,8 @@ from django.contrib.auth.forms import AuthenticationForm
 from .models import Cupcake, Cart, CartItem, Review, Category, Product
 from django.db.models import Avg
 
+# ---------------- Home & Shop Views ----------------
+
 def home(request):
     cupcakes = Cupcake.objects.all()  # Fetch all cupcakes
     return render(request, 'shop/home.html', {'cupcakes': cupcakes})
@@ -26,18 +28,18 @@ def view_cart(request):
     cart, _ = Cart.objects.get_or_create(user=request.user)
     items = cart.items.all()
 
-    # Correct total price calculation
+    # Calculate total price
     total_price = sum(item.cupcake.price * item.quantity for item in items)
 
     return render(request, "shop/cart.html", {"cart": cart, "items": items, "total_price": total_price})
 
+@login_required
 def add_to_cart(request, cupcake_id):
     cupcake = get_object_or_404(Cupcake, id=cupcake_id)
     
-    # Ensure the user is authenticated
     if not request.user.is_authenticated:
         messages.error(request, "You must be logged in to add items to the cart.")
-        return redirect("login")  # Change to your login page name
+        return redirect("login")  # Redirect to login page
     
     cart, _ = Cart.objects.get_or_create(user=request.user)
     cart_item, created = CartItem.objects.get_or_create(cart=cart, cupcake=cupcake)
@@ -47,7 +49,7 @@ def add_to_cart(request, cupcake_id):
         cart_item.save()
 
     messages.success(request, f"{cupcake.name} added to cart!")
-    return redirect("shop")  # Change to the correct redirect page
+    return redirect("shop")  # Redirect to shop page
 
 @login_required
 def remove_from_cart(request, item_id):
@@ -71,7 +73,7 @@ def update_cart(request, item_id):
             cart_item.delete()
             messages.success(request, "Item removed from cart.")
     
-    return redirect("cart")  # Ensure you redirect to the cart page
+    return redirect("view_cart")  # Redirect to cart page
 
 @login_required
 def submit_order(request):
@@ -82,7 +84,7 @@ def submit_order(request):
         messages.error(request, "Your cart is empty. Add items before submitting an order.")
         return redirect("view_cart")
     
-    # Simulate order submission (this is where you integrate payment processing)
+    # Simulate order submission (integrate payment processing here)
     cart.items.all().delete()  # Clear cart after submission
     messages.success(request, "Your order has been successfully placed!")
 
@@ -97,12 +99,11 @@ def checkout(request):
     total_price = sum(item.cupcake.price * item.quantity for item in items)
     
     if request.method == "POST":
-        cart.items.all().delete()  # Ensure cart is cleared after checkout
+        cart.items.all().delete()  # Clear cart after checkout
         messages.success(request, "Order placed successfully!")
         return redirect("home")  # Redirect after checkout
     
     return render(request, "shop/checkout.html", {"cart": cart, "items": items, "total_price": total_price})
-@login_required
 
 @login_required
 def process_checkout(request):
@@ -114,8 +115,6 @@ def process_checkout(request):
     messages.error(request, "Invalid request.")
     return redirect("checkout")
 
-def payment_options(request):
-    return render(request, "shop/payment_options.html")
 # ---------------- Review System ----------------
 
 @login_required

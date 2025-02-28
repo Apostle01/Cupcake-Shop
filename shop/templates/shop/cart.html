@@ -1,3 +1,7 @@
+{% extends "base.html" %}
+{% block title %}Your Shopping Cart | Cupcake Shop{% endblock %}
+
+{% block content %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -16,13 +20,25 @@
         .cart-container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); }
         .table th { background-color: #007bff; color: white; }
         .total { font-size: 20px; font-weight: bold; text-align: right; margin-top: 15px; }
+        .btn-sm { margin: 2px; } /* Added for better button spacing */
     </style>
 </head>
+{% load custom_filters %}
 <body>
     <div class="container">
         <div class="cart-container p-4">
             <h2 class="text-center mb-4"><i class="fa-solid fa-shopping-cart"></i> Your Shopping Cart</h2>
 
+            <!-- Display messages (e.g., success/error messages) -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} text-center">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <!-- Cart Table -->
             <table class="table table-bordered text-center">
                 <thead>
                     <tr>
@@ -47,27 +63,33 @@
                             </form>
                         </td>
                         <td>${{ item.cupcake.price|floatformat:2 }}</td>
-                        <td>${{ item.quantity|widthratio:1:item.cupcake.price }}</td>
+                        <td>${{ item.quantity|multiply:item.cupcake.price|floatformat:2 }}</td>
                         <td>
                             <a href="{% url 'remove_from_cart' item.id %}" class="btn btn-danger btn-sm">
-                                <i class="fa-solid fa-trash"></i>
+                                <i class="fa-solid fa-trash"></i> Remove
                             </a>
                             <a href="{% url 'add_review' item.cupcake.id %}" class="btn btn-warning btn-sm text-dark">
                                 <i class="fa-solid fa-star"></i> Review
                             </a>
                         </td>
                     </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center">Your cart is empty. <a href="{% url 'shop' %}" class="text-primary">Continue shopping</a>.</td>
+                    </tr>
                     {% endfor %}
                 </tbody>
             </table>
 
-            <div class="total">Total: ${{ total_price|floatformat:2 }}</div>
-
-            <div class="text-center mt-4">
-                <a href="{% url 'checkout' %}" class="btn btn-success btn-lg">
-                    <i class="fa-solid fa-credit-card"></i> Proceed to Checkout
-                </a>
-            </div>
+            <!-- Total Price and Checkout Button -->
+            {% if items %}
+                <div class="total">Total: ${{ total_price|floatformat:2 }}</div>
+                <div class="text-center mt-4">
+                    <a href="{% url 'checkout' %}" class="btn btn-success btn-lg">
+                        <i class="fa-solid fa-credit-card"></i> Proceed to Checkout
+                    </a>
+                </div>
+            {% endif %}
         </div>
     </div>
 
@@ -75,3 +97,4 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+{% endblock %}
