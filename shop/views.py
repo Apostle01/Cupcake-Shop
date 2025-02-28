@@ -25,7 +25,10 @@ def shop_now(request):
 def view_cart(request):
     cart, _ = Cart.objects.get_or_create(user=request.user)
     items = cart.items.all()
+
+    # Correct total price calculation
     total_price = sum(item.cupcake.price * item.quantity for item in items)
+
     return render(request, "shop/cart.html", {"cart": cart, "items": items, "total_price": total_price})
 
 def add_to_cart(request, cupcake_id):
@@ -56,8 +59,10 @@ def remove_from_cart(request, item_id):
 @login_required
 def update_cart(request, item_id):
     cart_item = get_object_or_404(CartItem, id=item_id, cart__user=request.user)
+    
     if request.method == "POST":
         quantity = int(request.POST.get("quantity", 1))
+        
         if quantity > 0:
             cart_item.quantity = quantity
             cart_item.save()
@@ -65,7 +70,8 @@ def update_cart(request, item_id):
         else:
             cart_item.delete()
             messages.success(request, "Item removed from cart.")
-    return redirect("view_cart")
+    
+    return redirect("cart")  # Ensure you redirect to the cart page
 
 @login_required
 def submit_order(request):
