@@ -12,6 +12,7 @@ urlpatterns = [
     # Cart & Checkout
     path('cart/', views.view_cart, name='view_cart'),  # Fixed duplicate name
     path('checkout/', views.checkout, name='checkout'),
+    path('process-checkout/', views.process_checkout, name='process_checkout'),  # Add this line!
     path('submit_order/', views.submit_order, name='submit_order'),
     path('payment_options/', views.payment_options, name='payment_options'),
 

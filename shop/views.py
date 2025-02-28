@@ -97,6 +97,17 @@ def checkout(request):
     
     return render(request, "shop/checkout.html", {"cart": cart, "items": items, "total_price": total_price})
 @login_required
+
+@login_required
+def process_checkout(request):
+    if request.method == "POST":
+        # Payment processing logic goes here
+        messages.success(request, "Your order has been placed successfully!")
+        return redirect("home")  # Redirect to homepage or order confirmation page
+    
+    messages.error(request, "Invalid request.")
+    return redirect("checkout")
+
 def payment_options(request):
     return render(request, "shop/payment_options.html")
 # ---------------- Review System ----------------
