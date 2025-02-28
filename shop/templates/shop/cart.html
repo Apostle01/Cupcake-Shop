@@ -47,7 +47,7 @@
                             </form>
                         </td>
                         <td>${{ item.cupcake.price|floatformat:2 }}</td>
-                        <td>${{ item.quantity|floatformat:2|mul:item.cupcake.price|floatformat:2 }}</td>
+                        <td>${{ item.quantity|widthratio:1:item.cupcake.price }}</td>
                         <td>
                             <a href="{% url 'remove_from_cart' item.id %}" class="btn btn-danger btn-sm">
                                 <i class="fa-solid fa-trash"></i>
