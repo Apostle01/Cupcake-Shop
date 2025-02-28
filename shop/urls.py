@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-from .views import custom_login
+from .views import custom_login, view_cart, update_cart  # Import the view
 
 urlpatterns = [
     path('', views.home, name='home'),  # Ensuring correct view function is called
@@ -17,6 +17,12 @@ urlpatterns = [
     path('payment_options/', views.payment_options, name='payment_options'),
     path('login/', custom_login, name='login'),
     path('add_review', views.add_review, name='add_review'),
-    path('add-to-cart/<int:cupcake_id>/', views.add_to_cart, name='add_to_cart'),  
+    path('add-to-cart/<int:cupcake_id>/', views.add_to_cart, name='add_to_cart'), 
+    path('cart/', view_cart, name='cart'),
+    path('cart/update/<int:item_id>/', update_cart, name='update_cart'),  # Ensure this exists
 ]
+ 
+
+
+
 
