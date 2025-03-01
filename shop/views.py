@@ -29,6 +29,12 @@ def view_orders(request):
     return render(request, 'shop/orders.html', {'orders': orders})
 
 @login_required
+def order_detail(request, order_id):
+    # Fetch the order for the current user
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    return render(request, 'shop/order_detail.html', {'order': order})
+
+@login_required
 def view_cart(request):
     cart, _ = Cart.objects.get_or_create(user=request.user)
     items = cart.items.all()
