@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}  <!-- Load the static template tag library -->
 {% block title %}Home | Cupcake Shop{% endblock %}
 
 {% block content %}
@@ -21,7 +22,7 @@
             font-family: 'Arial', sans-serif;
         }
         .hero-section {
-            background: url('path/to/your/hero-image.jpg') no-repeat center center/cover;
+            background: url('path/to/your/original_cupcake.jpg') no-repeat center center/cover;
             height: 60vh;
             display: flex;
             align-items: center;
@@ -74,7 +75,7 @@
     <!-- Hero Section -->
     <div class="hero-section">
         <div>
-            <img src="{% static 'images/logo.png' %}" alt="Cupcake Shop Logo" class="mb-3" style="height: 80px;">
+            <img src="{% static 'images/f & D.jpg' %}" alt="Cupcake Shop Logo" class="mb-3" style="height: 80px;">
             <h1>Welcome to Cupcake Shop</h1>
             <p>Indulge in our delicious, handcrafted cupcakes made with love and the finest ingredients. Whether you're here for a sweet treat or a special occasion, we've got something for everyone!</p>
             <div>
