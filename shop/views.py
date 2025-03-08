@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
 from django.contrib import messages
 from django.contrib.auth import login
-from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from .models import Cupcake, Cart, CartItem, Review, Category, Product, Order
 from django.db.models import Avg
 
@@ -21,18 +21,32 @@ def shop_now(request):
     products = Product.objects.all()  # Fetch all products
     return render(request, 'shop/shop.html', {'products': products})
 
-# ---------------- Cart Management ----------------
-@login_required  # Ensure only logged-in users can view orders
-def view_orders(request):
-    # Fetch orders for the current user
-    orders = Order.objects.filter(user=request.user).order_by('-created_at')
-    return render(request, 'shop/orders.html', {'orders': orders})
+# ---------------- Authentication ----------------
 
-@login_required
-def order_detail(request, order_id):
-    # Fetch the order for the current user
-    order = get_object_or_404(Order, id=order_id, user=request.user)
-    return render(request, 'shop/order_detail.html', {'order': order})
+def custom_login(request):
+    if request.method == 'POST':
+        form = AuthenticationForm(data=request.POST)
+        if form.is_valid():
+            login(request, form.get_user())
+            messages.success(request, "You have successfully logged in!")
+            return redirect('home')
+    else:
+        form = AuthenticationForm()
+    return render(request, 'shop/login.html', {'form': form})
+
+def signup(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            messages.success(request, "You have successfully signed up!")
+            return redirect('home')
+    else:
+        form = UserCreationForm()
+    return render(request, 'shop/signup.html', {'form': form})
+
+# ---------------- Cart Management ----------------
 
 @login_required
 def view_cart(request):
@@ -158,18 +172,6 @@ def add_review(request, cupcake_id):
     
     return render(request, "shop/add_review.html", {"cupcake": cupcake, "existing_review": existing_review})
 
-# ---------------- Authentication ----------------
-
-def custom_login(request):
-    if request.method == 'POST':
-        form = AuthenticationForm(data=request.POST)
-        if form.is_valid():
-            login(request, form.get_user())
-            return redirect('home')
-    else:
-        form = AuthenticationForm()
-    return render(request, 'shop/login.html', {'form': form})
-
 # ---------------- Category & Information Pages ----------------
 
 def category(request, slug):
@@ -186,3 +188,17 @@ def contact(request):
 @login_required
 def payment_options(request):
     return render(request, "shop/payment_options.html")
+
+# ---------------- Order Management ----------------
+
+@login_required
+def view_orders(request):
+    # Fetch orders for the current user
+    orders = Order.objects.filter(user=request.user).order_by('-created_at')
+    return render(request, 'shop/orders.html', {'orders': orders})
+
+@login_required
+def order_detail(request, order_id):
+    # Fetch the order for the current user
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    return render(request, 'shop/order_detail.html', {'order': order})

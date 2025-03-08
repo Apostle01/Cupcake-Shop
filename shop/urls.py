@@ -20,7 +20,8 @@ urlpatterns = [
 
     # Authentication
     path('login/', views.custom_login, name='login'),
-
+    path('signup/', views.signup, name='signup'),
+    
     # Reviews
     path('add_review/<int:cupcake_id>/', views.add_review, name='add_review'),  # Fixed missing ID
 
