@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% block title %}Shop | Cupcake Shop{% endblock %}
 
 {% block content %}
 <div class="container">
@@ -17,11 +18,11 @@
         </div>
         {% empty %}
         <p>No cupcakes available.</p>
-        <div>
-            <!-- Homepage Button -->
-            <a href="{% url 'home' %}" class="home-button btn btn-lg rounded-0 text-uppercase py-3">Homepage</a>
-        </div>
         {% endfor %}
+    </div>
+    <!-- Homepage Button -->
+    <div class="text-center mt-4">
+        <a href="{% url 'home' %}" class="btn btn-secondary btn-lg rounded-0 text-uppercase py-3">Home</a>
     </div>
 </div>
 {% endblock %}

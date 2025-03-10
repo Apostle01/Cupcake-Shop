@@ -69,6 +69,15 @@ th {
     background: #218838;
 }
 
+.home-button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+}
+.home-button:hover {
+    background-color: #0056b3;
+}
+
 footer {
     background-color: #343a40;
     color: white;
