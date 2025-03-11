@@ -55,7 +55,7 @@ class CartItem(models.Model):
         unique_together = ('cart', 'cupcake')  # Ensures no duplicate items
 
     def __str__(self):
-        return f"{self.quantity} x {self.cupcake.name}"
+        return f"{self.quantity} x {self.cupcake.name} in {self.cart}"
 
     def total_price(self):
         return self.cupcake.price * self.quantity

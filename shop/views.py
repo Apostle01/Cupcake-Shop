@@ -51,14 +51,17 @@ def signup(request):
 # -------------------- Cart Management --------------------
 @login_required
 def view_cart(request):
-    cart, _ = Cart.objects.get_or_create(user=request.user)
-    items = cart.items.all()
-    total_price = sum(item.cupcake.price * item.quantity for item in items)
-    return render(request, "shop/cart.html", {"cart": cart, "items": items, "total_price": total_price})
+    # Get the cart for the current user
+    cart = Cart.objects.filter(user=request.user).first()
+    
+    if cart:
+        # Get all cart items for the user's cart
+        cart_items = CartItem.objects.filter(cart=cart)
+        total_price = sum(item.cupcake.price * item.quantity for item in cart_items)
+    else:
+        cart_items = []
+        total_price = 0
 
-def view_cart(request):
-    cart_items = CartItem.objects.filter(user=request.user)
-    total_price = sum(item.cupcake.price * item.quantity for item in cart_items)
     return render(request, 'shop/cart.html', {'cart_items': cart_items, 'total_price': total_price})
 
 @login_required
