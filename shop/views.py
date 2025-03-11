@@ -123,6 +123,29 @@ def checkout(request):
 def order_confirmation(request):
     return render(request, "shop/order_confirmation.html")
 
+def process_checkout(request):
+    if request.method == 'POST':
+        # Fetch cart items for the current user
+        cart_items = CartItem.objects.filter(user=request.user)
+        cart_total = sum(item.cupcake.price * item.quantity for item in cart_items)
+
+        try:
+            # Create a Stripe charge
+            charge = stripe.Charge.create(
+                amount=int(cart_total * 100),  # Convert to cents
+                currency='usd',
+                description='Cupcake Shop Purchase',
+                source=request.POST.get('stripeToken')  # Get the Stripe token from the form
+            )
+            # Clear the cart after successful payment
+            cart_items.delete()
+            messages.success(request, 'Payment successful! Your order has been placed.')
+            return redirect('order_confirmation')  # Redirect to order confirmation page
+        except stripe.error.StripeError as e:
+            messages.error(request, f'Payment failed: {e}')
+            return redirect('checkout')  # Redirect back to checkout page on failure
+    return redirect('checkout')  # Redirect if the request method is not POST
+
 # -------------------- Review System --------------------
 @login_required
 def add_review(request, cupcake_id):
