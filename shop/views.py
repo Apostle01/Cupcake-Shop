@@ -56,6 +56,11 @@ def view_cart(request):
     total_price = sum(item.cupcake.price * item.quantity for item in items)
     return render(request, "shop/cart.html", {"cart": cart, "items": items, "total_price": total_price})
 
+def view_cart(request):
+    cart_items = CartItem.objects.filter(user=request.user)
+    total_price = sum(item.cupcake.price * item.quantity for item in cart_items)
+    return render(request, 'shop/cart.html', {'cart_items': cart_items, 'total_price': total_price})
+
 @login_required
 def add_to_cart(request, cupcake_id):
     cupcake = get_object_or_404(Cupcake, id=cupcake_id)
