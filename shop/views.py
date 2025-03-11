@@ -149,14 +149,35 @@ def process_checkout(request):
                 store_pickup=store_pickup
             )
 
+           
             # Clear the cart after successful payment
             cart_items.delete()
 
             messages.success(request, 'Payment successful! Your order has been placed.')
             return redirect('order_confirmation')
+        except stripe.error.CardError as e:
+            # Handle card errors (e.g., insufficient funds, card declined)
+            messages.error(request, f'Card error: {e.error.message}')
+        except stripe.error.RateLimitError as e:
+            # Handle rate limit errors (too many requests)
+            messages.error(request, 'Rate limit exceeded. Please try again later.')
+        except stripe.error.InvalidRequestError as e:
+            # Handle invalid request errors (e.g., invalid parameters)
+            messages.error(request, f'Invalid request: {e.error.message}')
+        except stripe.error.AuthenticationError as e:
+            # Handle authentication errors (e.g., invalid API key)
+            messages.error(request, 'Authentication error. Please contact support.')
+        except stripe.error.APIConnectionError as e:
+            # Handle API connection errors (e.g., network issues)
+            messages.error(request, 'Network error. Please check your connection.')
         except stripe.error.StripeError as e:
-            messages.error(request, f'Payment failed: {e}')
-            return redirect('checkout')
+            # Handle generic Stripe errors
+            messages.error(request, f'Payment failed: {e.error.message}')
+        except Exception as e:
+            # Handle other unexpected errors
+            messages.error(request, f'An unexpected error occurred: {str(e)}')
+
+        return redirect('checkout')
     return redirect('checkout')
 
 @login_required
