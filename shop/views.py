@@ -47,7 +47,8 @@ def signup(request):
     return render(request, 'shop/signup.html', {'form': form})
 
 # ---------------- Cart Management ----------------
-
+def cart(request):
+    return render(request, 'shop/cart.html')
 @login_required
 def view_cart(request):
     cart, _ = Cart.objects.get_or_create(user=request.user)
