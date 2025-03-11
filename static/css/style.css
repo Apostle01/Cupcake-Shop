@@ -78,6 +78,15 @@ th {
     background-color: #0056b3;
 }
 
+.cart-button {
+    background-color: #343a40;
+    color: white;
+    border: none;
+}
+.cart-button:hover {
+    background-color: #0056b3;
+}
+
 footer {
     background-color: #343a40;
     color: white;
