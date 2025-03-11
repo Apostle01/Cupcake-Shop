@@ -102,30 +102,19 @@ def update_cart(request, item_id):
     return redirect("view_cart")
 
 # -------------------- Checkout & Payment --------------------
-@login_required
 def checkout(request):
-    cart, _ = Cart.objects.get_or_create(user=request.user)
-    items = cart.items.all()
-    total_price = sum(item.cupcake.price * item.quantity for item in items)
+    # Get the cart for the current user
+    cart = Cart.objects.filter(user=request.user).first()
     
-    if request.method == "POST":
-        try:
-            # Process payment with Stripe
-            charge = stripe.Charge.create(
-                amount=int(total_price * 100),  # Convert to cents
-                currency="usd",
-                description="Cupcake Shop Purchase",
-                source=request.POST.get("stripeToken")
-            )
-            # Clear the cart after successful payment
-            cart.items.all().delete()
-            messages.success(request, "Payment successful! Your order has been placed.")
-            return redirect("order_confirmation")
-        except stripe.error.StripeError as e:
-            messages.error(request, f"Payment failed: {e}")
-            return redirect("checkout")
-    
-    return render(request, "shop/checkout.html", {"cart": cart, "items": items, "total_price": total_price})
+    if cart:
+        # Get all cart items for the user's cart
+        cart_items = CartItem.objects.filter(cart=cart)
+        cart_total = sum(item.cupcake.price * item.quantity for item in cart_items)
+    else:
+        cart_items = []
+        cart_total = 0
+
+    return render(request, 'shop/checkout.html', {'cart_items': cart_items, 'cart_total': cart_total})
 
 def process_checkout(request):
     if request.method == 'POST':
