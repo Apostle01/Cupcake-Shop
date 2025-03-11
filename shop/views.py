@@ -4,11 +4,14 @@ from django.contrib.auth.views import LoginView
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
-from .models import Cupcake, Cart, CartItem, Review, Category, Product, Order
 from django.db.models import Avg
+from django.conf import settings
+from .models import Cupcake, Cart, CartItem, Review, Category, Product, Order
+import stripe
 
-# ---------------- Home & Shop Views ----------------
+stripe.api_key = settings.STRIPE_SECRET_KEY
 
+# -------------------- Home & Shop Views --------------------
 def home(request):
     cupcakes = Cupcake.objects.all()  # Fetch all cupcakes
     return render(request, 'shop/home.html', {'cupcakes': cupcakes})
@@ -21,8 +24,7 @@ def shop_now(request):
     products = Product.objects.all()  # Fetch all products
     return render(request, 'shop/shop.html', {'products': products})
 
-# ---------------- Authentication ----------------
-
+# -------------------- Authentication --------------------
 def custom_login(request):
     if request.method == 'POST':
         form = AuthenticationForm(data=request.POST)
@@ -46,27 +48,17 @@ def signup(request):
         form = UserCreationForm()
     return render(request, 'shop/signup.html', {'form': form})
 
-# ---------------- Cart Management ----------------
-def cart(request):
-    return render(request, 'shop/cart.html')
+# -------------------- Cart Management --------------------
 @login_required
 def view_cart(request):
     cart, _ = Cart.objects.get_or_create(user=request.user)
     items = cart.items.all()
-
-    # Calculate total price
     total_price = sum(item.cupcake.price * item.quantity for item in items)
-
     return render(request, "shop/cart.html", {"cart": cart, "items": items, "total_price": total_price})
 
 @login_required
 def add_to_cart(request, cupcake_id):
     cupcake = get_object_or_404(Cupcake, id=cupcake_id)
-    
-    if not request.user.is_authenticated:
-        messages.error(request, "You must be logged in to add items to the cart.")
-        return redirect("login")  # Redirect to login page
-    
     cart, _ = Cart.objects.get_or_create(user=request.user)
     cart_item, created = CartItem.objects.get_or_create(cart=cart, cupcake=cupcake)
     
@@ -75,7 +67,7 @@ def add_to_cart(request, cupcake_id):
         cart_item.save()
 
     messages.success(request, f"{cupcake.name} added to cart!")
-    return redirect("shop")  # Redirect to shop page
+    return redirect("shop")
 
 @login_required
 def remove_from_cart(request, item_id):
@@ -99,25 +91,9 @@ def update_cart(request, item_id):
             cart_item.delete()
             messages.success(request, "Item removed from cart.")
     
-    return redirect("view_cart")  # Redirect to cart page
+    return redirect("view_cart")
 
-@login_required
-def submit_order(request):
-    cart, _ = Cart.objects.get_or_create(user=request.user)
-    items = cart.items.all()
-    
-    if not items:
-        messages.error(request, "Your cart is empty. Add items before submitting an order.")
-        return redirect("view_cart")
-    
-    # Simulate order submission (integrate payment processing here)
-    cart.items.all().delete()  # Clear cart after submission
-    messages.success(request, "Your order has been successfully placed!")
-
-    return redirect("home")  # Redirect to homepage or order confirmation page
-
-# ---------------- Checkout ----------------
-
+# -------------------- Checkout & Payment --------------------
 @login_required
 def checkout(request):
     cart, _ = Cart.objects.get_or_create(user=request.user)
@@ -125,24 +101,29 @@ def checkout(request):
     total_price = sum(item.cupcake.price * item.quantity for item in items)
     
     if request.method == "POST":
-        cart.items.all().delete()  # Clear cart after checkout
-        messages.success(request, "Order placed successfully!")
-        return redirect("home")  # Redirect after checkout
+        try:
+            # Process payment with Stripe
+            charge = stripe.Charge.create(
+                amount=int(total_price * 100),  # Convert to cents
+                currency="usd",
+                description="Cupcake Shop Purchase",
+                source=request.POST.get("stripeToken")
+            )
+            # Clear the cart after successful payment
+            cart.items.all().delete()
+            messages.success(request, "Payment successful! Your order has been placed.")
+            return redirect("order_confirmation")
+        except stripe.error.StripeError as e:
+            messages.error(request, f"Payment failed: {e}")
+            return redirect("checkout")
     
     return render(request, "shop/checkout.html", {"cart": cart, "items": items, "total_price": total_price})
 
 @login_required
-def process_checkout(request):
-    if request.method == "POST":
-        # Payment processing logic goes here
-        messages.success(request, "Your order has been placed successfully!")
-        return redirect("home")  # Redirect to homepage or order confirmation page
-    
-    messages.error(request, "Invalid request.")
-    return redirect("checkout")
+def order_confirmation(request):
+    return render(request, "shop/order_confirmation.html")
 
-# ---------------- Review System ----------------
-
+# -------------------- Review System --------------------
 @login_required
 def add_review(request, cupcake_id):
     cupcake = get_object_or_404(Cupcake, id=cupcake_id)
@@ -173,8 +154,7 @@ def add_review(request, cupcake_id):
     
     return render(request, "shop/add_review.html", {"cupcake": cupcake, "existing_review": existing_review})
 
-# ---------------- Category & Information Pages ----------------
-
+# -------------------- Category & Information Pages --------------------
 def category(request, slug):
     category = get_object_or_404(Category, slug=slug)
     products = Product.objects.filter(category=category)
@@ -186,20 +166,13 @@ def about(request):
 def contact(request):
     return render(request, 'shop/contact.html')
 
-@login_required
-def payment_options(request):
-    return render(request, "shop/payment_options.html")
-
-# ---------------- Order Management ----------------
-
+# -------------------- Order Management --------------------
 @login_required
 def view_orders(request):
-    # Fetch orders for the current user
     orders = Order.objects.filter(user=request.user).order_by('-created_at')
     return render(request, 'shop/orders.html', {'orders': orders})
 
 @login_required
 def order_detail(request, order_id):
-    # Fetch the order for the current user
     order = get_object_or_404(Order, id=order_id, user=request.user)
     return render(request, 'shop/order_detail.html', {'order': order})

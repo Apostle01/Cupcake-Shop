@@ -1,0 +1,28 @@
+from django.shortcuts import redirect
+from django.contrib import messages
+import stripe
+from django.conf import settings
+
+stripe.api_key = settings.STRIPE_SECRET_KEY
+
+def process_checkout(request):
+    if request.method == 'POST':
+        cart_items = CartItem.objects.filter(user=request.user)
+        cart_total = sum(item.total_price for item in cart_items)
+
+        try:
+            # Create a Stripe charge
+            charge = stripe.Charge.create(
+                amount=int(cart_total * 100),  # Convert to cents
+                currency='usd',
+                description='Cupcake Shop Purchase',
+                source=request.POST['stripeToken']
+            )
+            # Clear the cart after successful payment
+            cart_items.delete()
+            messages.success(request, 'Payment successful! Your order has been placed.')
+            return redirect('order_confirmation')
+        except stripe.error.StripeError as e:
+            messages.error(request, f'Payment failed: {e}')
+            return redirect('checkout')
+    return redirect('checkout')

@@ -3,19 +3,109 @@
 
 {% block content %}
 <div class="container">
-    <h2>Checkout</h2>
-    <form action="{% url 'process_checkout' %}" method="post">
+    <h1 class="text-center my-4">Checkout</h1>
+    <h2 class="mb-4">Review Your Order</h2>
+
+    {% if cart_items %}
+    <div class="table-responsive">
+        <table class="table table-bordered">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Product</th>
+                    <th>Quantity</th>
+                    <th>Unit Price</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in cart_items %}
+                <tr>
+                    <td>{{ item.cupcake.name }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>${{ item.cupcake.price|floatformat:2 }}</td>
+                    <td>${{ item.total_price|floatformat:2 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <p class="text-end fs-5 fw-bold">Total: ${{ cart_total|floatformat:2 }}</p>
+
+    <h2 class="mt-5 mb-4">Payment</h2>
+    <form action="{% url 'process_checkout' %}" method="post" id="payment-form">
         {% csrf_token %}
-        <label>Name:</label>
-        <input type="text" name="name" class="form-control" required>
-
-        <label>Email:</label>
-        <input type="email" name="email" class="form-control" required>
-
-        <label>Address:</label>
-        <textarea name="address" class="form-control" required></textarea>
-
-        <button type="submit" class="btn btn-success mt-3">Complete Order</button>
+        <div class="mb-3">
+            <div id="card-element" class="form-control">
+                <!-- Stripe Card Element will be inserted here -->
+            </div>
+            <div id="card-errors" class="text-danger mt-2" role="alert"></div>
+        </div>
+        <button type="submit" class="btn btn-success btn-lg w-100">
+            <i class="fa-solid fa-credit-card"></i> Submit Payment
+        </button>
     </form>
+    {% else %}
+    <div class="alert alert-info text-center">
+        <p>Your cart is empty. <a href="{% url 'shop' %}" class="text-primary">Continue shopping</a>.</p>
+    </div>
+    {% endif %}
 </div>
+
+<!-- Stripe Script -->
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+    var stripe = Stripe('{{ STRIPE_PUBLIC_KEY }}');
+    var elements = stripe.elements();
+
+    // Customize the appearance of the card element
+    var style = {
+        base: {
+            color: '#32325d',
+            fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
+            fontSmoothing: 'antialiased',
+            fontSize: '16px',
+            '::placeholder': {
+                color: '#aab7c4'
+            }
+        },
+        invalid: {
+            color: '#fa755a',
+            iconColor: '#fa755a'
+        }
+    };
+
+    var card = elements.create('card', { style: style });
+    card.mount('#card-element');
+
+    // Handle real-time validation errors from the card element
+    card.on('change', function(event) {
+        var displayError = document.getElementById('card-errors');
+        if (event.error) {
+            displayError.textContent = event.error.message;
+        } else {
+            displayError.textContent = '';
+        }
+    });
+
+    // Handle form submission
+    var form = document.getElementById('payment-form');
+    form.addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        stripe.createToken(card).then(function(result) {
+            if (result.error) {
+                var errorElement = document.getElementById('card-errors');
+                errorElement.textContent = result.error.message;
+            } else {
+                // Add the token to the form and submit
+                var hiddenInput = document.createElement('input');
+                hiddenInput.setAttribute('type', 'hidden');
+                hiddenInput.setAttribute('name', 'stripeToken');
+                hiddenInput.setAttribute('value', result.token.id);
+                form.appendChild(hiddenInput);
+                form.submit();
+            }
+        });
+    });
+</script>
 {% endblock %}
