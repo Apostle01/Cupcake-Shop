@@ -199,3 +199,10 @@ def view_orders(request):
 def order_detail(request, order_id):
     order = get_object_or_404(Order, id=order_id, user=request.user)
     return render(request, 'shop/order_detail.html', {'order': order})
+
+@login_required
+def payment_options(request):
+    """
+    View to display payment options.
+    """
+    return render(request, 'shop/payment_options.html')
