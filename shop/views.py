@@ -127,15 +127,18 @@ def checkout(request):
     
     return render(request, "shop/checkout.html", {"cart": cart, "items": items, "total_price": total_price})
 
-@login_required
-def order_confirmation(request):
-    return render(request, "shop/order_confirmation.html")
-
 def process_checkout(request):
     if request.method == 'POST':
         # Fetch cart items for the current user
-        cart_items = CartItem.objects.filter(user=request.user)
+        cart_items = CartItem.objects.filter(cart__user=request.user)
         cart_total = sum(item.cupcake.price * item.quantity for item in cart_items)
+
+        # Get delivery/pickup details
+        delivery_address = request.POST.get('delivery_address')
+        city = request.POST.get('city')
+        postal_code = request.POST.get('postal_code')
+        country = request.POST.get('country')
+        store_pickup = request.POST.get('store_pickup') == 'on'
 
         try:
             # Create a Stripe charge
@@ -143,16 +146,33 @@ def process_checkout(request):
                 amount=int(cart_total * 100),  # Convert to cents
                 currency='usd',
                 description='Cupcake Shop Purchase',
-                source=request.POST.get('stripeToken')  # Get the Stripe token from the form
+                source=request.POST.get('stripeToken')
             )
+
+            # Create an order
+            order = Order.objects.create(
+                user=request.user,
+                total_price=cart_total,
+                delivery_address=delivery_address if not store_pickup else None,
+                city=city if not store_pickup else None,
+                postal_code=postal_code if not store_pickup else None,
+                country=country if not store_pickup else None,
+                store_pickup=store_pickup
+            )
+
             # Clear the cart after successful payment
             cart_items.delete()
+
             messages.success(request, 'Payment successful! Your order has been placed.')
-            return redirect('order_confirmation')  # Redirect to order confirmation page
+            return redirect('order_confirmation')
         except stripe.error.StripeError as e:
             messages.error(request, f'Payment failed: {e}')
-            return redirect('checkout')  # Redirect back to checkout page on failure
-    return redirect('checkout')  # Redirect if the request method is not POST
+            return redirect('checkout')
+    return redirect('checkout')
+
+@login_required
+def order_confirmation(request):
+    return render(request, "shop/order_confirmation.html")
 
 # -------------------- Review System --------------------
 @login_required

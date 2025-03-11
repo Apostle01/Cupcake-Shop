@@ -69,13 +69,16 @@ class Order(models.Model):
     ]
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True)
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
-    status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='P')
-    items = models.ManyToManyField('Cupcake', through='OrderItem')
+    delivery_address = models.CharField(max_length=255, null=True, blank=True)
+    city = models.CharField(max_length=100, null=True, blank=True)
+    postal_code = models.CharField(max_length=20, null=True, blank=True)
+    country = models.CharField(max_length=100, null=True, blank=True)
+    store_pickup = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Order {self.id} by {self.user.username}"
+        return f"Order #{self.id} by {self.user.username}"
 
 
 class OrderItem(models.Model):
@@ -96,3 +99,4 @@ class Review(models.Model):
 
     def __str__(self):
         return f"Review by {self.user.username} for {self.cupcake.name}"
+    
