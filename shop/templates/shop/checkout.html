@@ -90,6 +90,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
+                <!-- Card Details Form -->
                 <form id="card-form">
                     <!-- Card Number -->
                     <div class="mb-3">
@@ -182,7 +183,7 @@
             if (result.error) {
                 displayError(result.error);
             } else {
-                // Add the token to the form and submit
+                // Add the token to the main form and submit
                 var hiddenInput = document.createElement('input');
                 hiddenInput.setAttribute('type', 'hidden');
                 hiddenInput.setAttribute('name', 'stripeToken');
