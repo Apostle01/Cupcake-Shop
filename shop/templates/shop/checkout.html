@@ -67,25 +67,44 @@
             </div>
         </div>
 
-        <!-- Payment Details -->
-        <h4>Payment Details</h4>
-        <div class="mb-3">
-            <div id="card-element" class="form-control">
-                <!-- Stripe Card Element will be inserted here -->
-            </div>
-            <div id="card-errors" class="text-danger mt-2" role="alert"></div>
+          <!-- Payment Button -->
+          <div class="text-center mt-4">
+            <button type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#paymentModal">
+                <i class="fa-solid fa-credit-card"></i> Pay with Card
+            </button>
         </div>
-
-        <!-- Submit Button -->
-        <button type="submit" class="btn btn-success btn-lg w-100">
-            <i class="fa-solid fa-credit-card"></i> Submit Payment
-        </button>
     </form>
     {% else %}
     <div class="alert alert-info text-center">
         <p>Your cart is empty. <a href="{% url 'shop' %}" class="text-primary">Continue shopping</a>.</p>
     </div>
     {% endif %}
+</div>
+
+<!-- Payment Modal -->
+<div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="paymentModalLabel">Enter Card Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="card-form">
+                    <div class="mb-3">
+                        <div id="card-element" class="form-control">
+                            <!-- Stripe Card Element will be inserted here -->
+                        </div>
+                        <div id="card-errors" class="text-danger mt-2" role="alert"></div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" id="submit-payment" class="btn btn-primary">Submit Payment</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Stripe Script -->
@@ -145,4 +164,5 @@
         });
     });
 </script>
+
 {% endblock %}
