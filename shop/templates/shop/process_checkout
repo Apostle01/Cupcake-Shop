@@ -7,8 +7,16 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 
 def process_checkout(request):
     if request.method == 'POST':
-        cart_items = CartItem.objects.filter(user=request.user)
-        cart_total = sum(item.total_price for item in cart_items)
+        # Fetch cart items for the current user
+        cart_items = CartItem.objects.filter(cart__user=request.user)
+        cart_total = sum(item.cupcake.price * item.quantity for item in cart_items)
+
+        # Get delivery/pickup details
+        delivery_address = request.POST.get('delivery_address')
+        city = request.POST.get('city')
+        postal_code = request.POST.get('postal_code')
+        country = request.POST.get('country')
+        store_pickup = request.POST.get('store_pickup') == 'on'
 
         try:
             # Create a Stripe charge
@@ -16,13 +24,39 @@ def process_checkout(request):
                 amount=int(cart_total * 100),  # Convert to cents
                 currency='usd',
                 description='Cupcake Shop Purchase',
-                source=request.POST['stripeToken']
+                source=request.POST.get('stripeToken')
             )
+
+            # Create an order
+            order = Order.objects.create(
+                user=request.user,
+                total_price=cart_total,
+                delivery_address=delivery_address if not store_pickup else None,
+                city=city if not store_pickup else None,
+                postal_code=postal_code if not store_pickup else None,
+                country=country if not store_pickup else None,
+                store_pickup=store_pickup
+            )
+
             # Clear the cart after successful payment
             cart_items.delete()
+
             messages.success(request, 'Payment successful! Your order has been placed.')
             return redirect('order_confirmation')
+        except stripe.error.CardError as e:
+            messages.error(request, f'Card error: {e.error.message}')
+        except stripe.error.RateLimitError as e:
+            messages.error(request, 'Rate limit exceeded. Please try again later.')
+        except stripe.error.InvalidRequestError as e:
+            messages.error(request, f'Invalid request: {e.error.message}')
+        except stripe.error.AuthenticationError as e:
+            messages.error(request, 'Authentication error. Please contact support.')
+        except stripe.error.APIConnectionError as e:
+            messages.error(request, 'Network error. Please check your connection.')
         except stripe.error.StripeError as e:
-            messages.error(request, f'Payment failed: {e}')
-            return redirect('checkout')
+            messages.error(request, f'Payment failed: {e.error.message}')
+        except Exception as e:
+            messages.error(request, f'An unexpected error occurred: {str(e)}')
+
+        return redirect('checkout')
     return redirect('checkout')

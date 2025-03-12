@@ -67,8 +67,8 @@
             </div>
         </div>
 
-          <!-- Payment Button -->
-          <div class="text-center mt-4">
+        <!-- Payment Button -->
+        <div class="text-center mt-4">
             <button type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#paymentModal">
                 <i class="fa-solid fa-credit-card"></i> Pay with Card
             </button>
@@ -91,12 +91,26 @@
             </div>
             <div class="modal-body">
                 <form id="card-form">
+                    <!-- Card Number -->
                     <div class="mb-3">
-                        <div id="card-element" class="form-control">
-                            <!-- Stripe Card Element will be inserted here -->
-                        </div>
-                        <div id="card-errors" class="text-danger mt-2" role="alert"></div>
+                        <label for="card-number">Card Number</label>
+                        <div id="card-number" class="form-control"></div>
                     </div>
+
+                    <!-- Expiration Date -->
+                    <div class="mb-3">
+                        <label for="card-expiry">Expiration Date</label>
+                        <div id="card-expiry" class="form-control"></div>
+                    </div>
+
+                    <!-- CVC -->
+                    <div class="mb-3">
+                        <label for="card-cvc">CVC</label>
+                        <div id="card-cvc" class="form-control"></div>
+                    </div>
+
+                    <!-- Display Errors -->
+                    <div id="card-errors" class="text-danger mt-2" role="alert"></div>
                 </form>
             </div>
             <div class="modal-footer">
@@ -113,7 +127,7 @@
     var stripe = Stripe('{{ STRIPE_PUBLIC_KEY }}');
     var elements = stripe.elements();
 
-    // Customize the appearance of the card element
+    // Customize the appearance of the card elements
     var style = {
         base: {
             color: '#32325d',
@@ -130,39 +144,53 @@
         }
     };
 
-    var card = elements.create('card', { style: style });
-    card.mount('#card-element');
+    // Create separate card elements
+    var cardNumber = elements.create('cardNumber', { style: style });
+    cardNumber.mount('#card-number');
 
-    // Handle real-time validation errors from the card element
-    card.on('change', function(event) {
-        var displayError = document.getElementById('card-errors');
-        if (event.error) {
-            displayError.textContent = event.error.message;
-        } else {
-            displayError.textContent = '';
-        }
+    var cardExpiry = elements.create('cardExpiry', { style: style });
+    cardExpiry.mount('#card-expiry');
+
+    var cardCvc = elements.create('cardCvc', { style: style });
+    cardCvc.mount('#card-cvc');
+
+    // Handle real-time validation errors
+    cardNumber.on('change', function(event) {
+        displayError(event.error);
     });
 
-    // Handle form submission
-    var form = document.getElementById('payment-form');
-    form.addEventListener('submit', function(event) {
-        event.preventDefault();
+    cardExpiry.on('change', function(event) {
+        displayError(event.error);
+    });
 
-        stripe.createToken(card).then(function(result) {
+    cardCvc.on('change', function(event) {
+        displayError(event.error);
+    });
+
+    function displayError(error) {
+        var errorElement = document.getElementById('card-errors');
+        if (error) {
+            errorElement.textContent = error.message;
+        } else {
+            errorElement.textContent = '';
+        }
+    }
+
+    // Handle form submission
+    document.getElementById('submit-payment').addEventListener('click', function() {
+        stripe.createToken(cardNumber).then(function(result) {
             if (result.error) {
-                var errorElement = document.getElementById('card-errors');
-                errorElement.textContent = result.error.message;
+                displayError(result.error);
             } else {
                 // Add the token to the form and submit
                 var hiddenInput = document.createElement('input');
                 hiddenInput.setAttribute('type', 'hidden');
                 hiddenInput.setAttribute('name', 'stripeToken');
                 hiddenInput.setAttribute('value', result.token.id);
-                form.appendChild(hiddenInput);
-                form.submit();
+                document.getElementById('payment-form').appendChild(hiddenInput);
+                document.getElementById('payment-form').submit();
             }
         });
     });
 </script>
-
 {% endblock %}
