@@ -67,13 +67,11 @@
             </div>
         </div>
 
-        <!-- Payment Button -->
+        <!-- Payment Buttons -->
         <div class="text-center mt-4">
             <button type="button" class="btn btn-info btn-lg me-3" disabled>
                 <i class="fa-solid fa-wallet"></i> Pay with Wallet (Coming Soon)
             </button>
-        </div>
-        <div class="text-center mt-4">
             <button type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#paymentModal">
                 <i class="fa-solid fa-credit-card"></i> Pay with Card
             </button>
@@ -96,7 +94,7 @@
             </div>
             <div class="modal-body">
                 <!-- Card Details Form -->
-                <form action="/action_page" id="card-form">
+                <form id="card-form">
                     <!-- Card Number -->
                     <div class="mb-3">
                         <label for="card-number">Card Number</label>
@@ -114,10 +112,13 @@
                         <label for="card-cvc">CVC</label>
                         <div id="card-cvc" class="form-control StripeElement StripeElement--empty"></div>
                     </div>
-                    <div class="form-checkbox mb-3>
-                        <label class="form-check-input" type="checkbox" name="remember">Remember me
-                        </label>
+
+                    <!-- Remember Me Checkbox -->
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="remember-me" name="remember">
+                        <label class="form-check-label" for="remember-me">Remember me</label>
                     </div>
+
                     <!-- Display Errors -->
                     <div id="card-errors" class="text-danger mt-2" role="alert"></div>
                 </form>
