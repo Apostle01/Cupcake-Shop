@@ -96,7 +96,7 @@
             </div>
             <div class="modal-body">
                 <!-- Card Details Form -->
-                <form id="card-form">
+                <form action="/action_page" id="card-form">
                     <!-- Card Number -->
                     <div class="mb-3">
                         <label for="card-number">Card Number</label>
@@ -114,7 +114,10 @@
                         <label for="card-cvc">CVC</label>
                         <div id="card-cvc" class="form-control StripeElement StripeElement--empty"></div>
                     </div>
-
+                    <div class="form-checkbox mb-3>
+                        <label class="form-check-input" type="checkbox" name="remember">Remember me
+                        </label>
+                    </div>
                     <!-- Display Errors -->
                     <div id="card-errors" class="text-danger mt-2" role="alert"></div>
                 </form>
