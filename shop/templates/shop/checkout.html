@@ -67,11 +67,13 @@
             </div>
         </div>
 
-        <!-- Payment Options -->
+        <!-- Payment Button -->
         <div class="text-center mt-4">
             <button type="button" class="btn btn-info btn-lg me-3" disabled>
                 <i class="fa-solid fa-wallet"></i> Pay with Wallet (Coming Soon)
             </button>
+        </div>
+        <div class="text-center mt-4">
             <button type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#paymentModal">
                 <i class="fa-solid fa-credit-card"></i> Pay with Card
             </button>
@@ -100,19 +102,19 @@
                         <label for="card-number">Card Number</label>
                         <div id="card-number" class="form-control StripeElement StripeElement--empty"></div>
                     </div>
-                
+
                     <!-- Expiration Date -->
                     <div class="mb-3">
                         <label for="card-expiry">Expiration Date</label>
                         <div id="card-expiry" class="form-control StripeElement StripeElement--empty"></div>
                     </div>
-                
+
                     <!-- CVC -->
                     <div class="mb-3">
                         <label for="card-cvc">CVC</label>
                         <div id="card-cvc" class="form-control StripeElement StripeElement--empty"></div>
                     </div>
-                
+
                     <!-- Display Errors -->
                     <div id="card-errors" class="text-danger mt-2" role="alert"></div>
                 </form>
