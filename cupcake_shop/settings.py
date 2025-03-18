@@ -35,6 +35,14 @@ STRIPE_SECRET_KEY = config('STRIPE_SECRET_KEY', default='your-stripe-secret-key'
 # CSRF Trusted Origins
 CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', default='http://localhost,http://127.0.0.1', cast=lambda v: [s.strip() for s in v.split(',')])
 
+# Debugging: Print environment variables
+print("SECRET_KEY:", SECRET_KEY)
+print("DEBUG:", DEBUG)
+print("ALLOWED_HOSTS:", ALLOWED_HOSTS)
+print("STRIPE_PUBLIC_KEY:", STRIPE_PUBLIC_KEY)
+print("STRIPE_SECRET_KEY:", STRIPE_SECRET_KEY)
+print("CSRF_TRUSTED_ORIGINS:", CSRF_TRUSTED_ORIGINS)
+
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -160,3 +168,15 @@ LOGGING = {
         'level': 'INFO',
     },
 }
+
+# Fallback to os.environ if python-decouple fails
+import os
+
+SECRET_KEY = os.getenv('SECRET_KEY', SECRET_KEY)
+DEBUG = os.getenv('DEBUG', str(DEBUG)) == 'True'
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', ','.join(ALLOWED_HOSTS)).split(',')
+STRIPE_PUBLIC_KEY = os.getenv('STRIPE_PUBLIC_KEY', STRIPE_PUBLIC_KEY)
+STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY', STRIPE_SECRET_KEY)
+CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', ','.join(CSRF_TRUSTED_ORIGINS)).split(',')
+DATABASES['default']['ENGINE'] = os.getenv('DB_ENGINE', DATABASES['default']['ENGINE'])
+DATABASES['default']['NAME'] = os.getenv('DB_NAME', DATABASES['default']['NAME'])
