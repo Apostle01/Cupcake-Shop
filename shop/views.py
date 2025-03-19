@@ -213,10 +213,6 @@ def process_checkout(request):
         return redirect('checkout')
     return redirect('checkout')
 
-@login_required
-def order_confirmation(request):
-    return render(request, "shop/order_confirmation.html")
-
 # -------------------- Review System --------------------
 @login_required
 def add_review(request, cupcake_id):
@@ -262,6 +258,10 @@ def contact(request):
 
 # -------------------- Order Management --------------------
 @login_required
+def order_confirmation(request):
+    return render(request, "shop/order_confirmation.html")
+
+@login_required
 def view_orders(request):
     orders = Order.objects.filter(user=request.user).order_by('-created_at')
     return render(request, 'shop/orders.html', {'orders': orders})
@@ -270,6 +270,13 @@ def view_orders(request):
 def order_detail(request, order_id):
     order = get_object_or_404(Order, id=order_id, user=request.user)
     return render(request, 'shop/order_detail.html', {'order': order})
+
+def my_orders(request):
+    if request.user.is_authenticated:
+        orders = Order.objects.filter(user=request.user).order_by('-created_at')
+        return render(request, 'my_orders.html', {'orders': orders})
+    else:
+        return redirect('login')  # Redirect to login if user is not authenticated
 
 @login_required
 def payment_options(request):
