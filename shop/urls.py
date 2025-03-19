@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from .views import create_payment_intent
 
 urlpatterns = [
     # -------------------- General Pages --------------------
@@ -8,6 +9,7 @@ urlpatterns = [
     path('category/<slug:slug>/', views.category, name='category'),
     path('about/', views.about, name='about'),
     path('contact/', views.contact, name='contact'),
+    path('create-payment-intent/', create_payment_intent, name='create_payment_intent'),
 
     # -------------------- Authentication --------------------
     path('login/', views.custom_login, name='login'),

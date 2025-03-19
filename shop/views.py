@@ -7,6 +7,8 @@ from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.db.models import Avg
 from django.conf import settings
 from .models import Cupcake, Cart, CartItem, Review, Category, Product, Order
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 import stripe
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -25,6 +27,37 @@ def shop_now(request):
     return render(request, 'shop/shop.html', {'products': products})
 
 # -------------------- Authentication --------------------
+@csrf_exempt
+def create_payment_intent(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            payment_method_id = data.get('payment_method_id')
+            amount = data.get('amount')
+
+            # Create a PaymentIntent
+            intent = stripe.PaymentIntent.create(
+                amount=amount,
+                currency='usd',
+                payment_method=payment_method_id,
+                confirmation_method='manual',
+                confirm=True,
+            )
+
+            if intent.status == 'succeeded':
+                # Payment succeeded
+                return JsonResponse({'success': True})
+            else:
+                # Payment requires additional action (e.g., 3D Secure)
+                return JsonResponse({'success': False, 'error': 'Payment requires additional action.'})
+        except stripe.error.CardError as e:
+            # Payment failed
+            return JsonResponse({'success': False, 'error': str(e)})
+        except Exception as e:
+            # Other errors
+            return JsonResponse({'success': False, 'error': str(e)})
+    return JsonResponse({'success': False, 'error': 'Invalid request method.'})
+
 def custom_login(request):
     if request.method == 'POST':
         form = AuthenticationForm(data=request.POST)
