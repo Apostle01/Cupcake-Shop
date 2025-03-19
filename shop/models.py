@@ -70,7 +70,7 @@ class Order(models.Model):
     ]
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    stripe_payment_intent_id = models.CharField(max_length=100, unique=True)
+    stripe_payment_intent_id = models.CharField(max_length=100, unique=True, default='')
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
     delivery_address = models.CharField(max_length=255, null=True, blank=True)
     city = models.CharField(max_length=100, null=True, blank=True)
