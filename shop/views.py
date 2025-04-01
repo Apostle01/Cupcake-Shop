@@ -10,8 +10,42 @@ from .models import Cupcake, Cart, CartItem, Review, Category, Product, Order
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import stripe
+import json
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
+
+@csrf_exempt
+def process_payment(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            payment_method_id = data['payment_method_id']
+            amount = data['amount']
+
+            # Create and confirm PaymentIntent
+            intent = stripe.PaymentIntent.create(
+                amount=amount,
+                currency='usd',
+                payment_method=payment_method_id,
+                confirm=True,
+                off_session=True,
+            )
+
+            if intent.status == 'succeeded':
+                # Save order to database here
+                return JsonResponse({'success': True})
+            
+            return JsonResponse({'success': False, 'error': 'Payment failed'})
+            
+        except stripe.error.CardError as e:
+            return JsonResponse({'success': False, 'error': e.user_message})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+    
+    return JsonResponse({'success': False, 'error': 'Invalid request'})
+
+def order_success(request):
+    return render(request, 'order_success.html')
 
 # -------------------- Home & Shop Views --------------------
 def home(request):

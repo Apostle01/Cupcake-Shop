@@ -27,7 +27,9 @@ urlpatterns = [
     path('process-checkout/', views.process_checkout, name='process_checkout'),
     path('payment-options/', views.payment_options, name='payment_options'),
     path('order-confirmation/', views.order_confirmation, name='order_confirmation'),
-
+    path('process-payment/', views.process_payment, name='process_payment'),
+    path('order-success/', views.order_success, name='order_success'),
+    path('orders/<int:order_id>/', views.order_detail, name='order_detail'),
     # -------------------- Order Management --------------------
     path('orders/', views.view_orders, name='view_orders'),
     path('orders/<int:order_id>/', views.order_detail, name='order_detail'),
