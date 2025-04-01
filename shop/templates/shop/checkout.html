@@ -92,22 +92,58 @@
     {% endif %}
 </div>
 
+<!-- Stripe Elements Container -->
+<div id="card-element" class="form-control mb-3" style="display:none;"></div>
+<div id="card-errors" role="alert" class="text-danger mb-3"></div>
+
+<!-- Pay Now Button (initially hidden) -->
+<button id="submit-payment" class="btn btn-success btn-lg" style="display:none;">
+    <i class="fa-solid fa-lock"></i> Pay Now
+</button>
+
 <!-- Stripe Script -->
 <script src="https://js.stripe.com/v3/"></script>
 <script>
     // Initialize Stripe
-    const stripe = Stripe('{{ STRIPE_PUBLIC_KEY }}');
-    const elements = stripe.elements();
-    const card = elements.create('card');
-    card.mount('#card-element');
+    var stripe = Stripe('{{ STRIPE_PUBLIC_KEY }}');
+    var elements = stripe.elements();
+    var cardElement;
 
-    // Handle real-time validation errors
-    card.addEventListener('change', function(event) {
-        const displayError = document.getElementById('card-errors');
-        if (event.error) {
-            displayError.textContent = event.error.message;
-        } else {
-            displayError.textContent = '';
+    // Show card form when Pay with Card is clicked
+    document.getElementById('card-payment-btn').addEventListener('click', function() {
+        document.getElementById('card-payment-btn').style.display = 'none';
+        document.getElementById('card-element').style.display = 'block';
+        document.getElementById('submit-payment').style.display = 'block';
+        
+        // Create card element if not already created
+        if (!cardElement) {
+            var style = {
+                base: {
+                    color: '#32325d',
+                    fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
+                    fontSize: '16px',
+                    '::placeholder': {
+                        color: '#aab7c4'
+                    }
+                },
+                invalid: {
+                    color: '#fa755a',
+                    iconColor: '#fa755a'
+                }
+            };
+            
+            cardElement = elements.create('card', {style: style});
+            cardElement.mount('#card-element');
+            
+            // Handle real-time validation errors
+            cardElement.on('change', function(event) {
+                var displayError = document.getElementById('card-errors');
+                if (event.error) {
+                    displayError.textContent = event.error.message;
+                } else {
+                    displayError.textContent = '';
+                }
+            });
         }
     });
 
