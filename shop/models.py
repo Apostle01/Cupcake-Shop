@@ -78,7 +78,7 @@ class OrderItem(models.Model):
     order = models.ForeignKey(Order, related_name='items', on_delete=models.CASCADE)
     cupcake = models.ForeignKey(Cupcake, on_delete=models.PROTECT)
     quantity = models.PositiveIntegerField(default=1)
-    price = models.DecimalField(max_digits=10, decimal_places=2)
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
 class Review(models.Model):
     cupcake = models.ForeignKey(Cupcake, on_delete=models.CASCADE, related_name="reviews")
