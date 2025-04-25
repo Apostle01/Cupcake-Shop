@@ -1,16 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.views import LoginView
 from django.contrib import messages
-from django.contrib.auth import login
-from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
-from django.db.models import Avg
-from django.conf import settings
-from .models import Cupcake, Cart, CartItem, Review, Category, Product, Order
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
 import stripe
 import json
+from .models import Order, OrderItem, Cart, CartItem, Cupcake
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -21,6 +17,7 @@ def process_payment(request):
             data = json.loads(request.body)
             payment_method_id = data['payment_method_id']
             amount = data['amount']
+            delivery_info = data.get('delivery_info', {})
 
             # Create and confirm PaymentIntent
             intent = stripe.PaymentIntent.create(
@@ -28,24 +25,106 @@ def process_payment(request):
                 currency='usd',
                 payment_method=payment_method_id,
                 confirm=True,
-                off_session=True,
+                metadata={
+                    'user_id': request.user.id,
+                    'delivery_address': delivery_info.get('address', ''),
+                    'city': delivery_info.get('city', ''),
+                    'postal_code': delivery_info.get('postal_code', ''),
+                    'country': delivery_info.get('country', ''),
+                    'store_pickup': str(delivery_info.get('store_pickup', False))
+                }
             )
 
             if intent.status == 'succeeded':
-                # Save order to database here
-                return JsonResponse({'success': True})
+                # Get user's cart
+                cart = Cart.objects.get(user=request.user)
+                cart_items = CartItem.objects.filter(cart=cart)
+                
+                # Create order
+                order = Order.objects.create(
+                    user=request.user,
+                    total_price=amount / 100,  # Convert back to dollars
+                    stripe_payment_intent_id=intent.id,
+                    delivery_address=delivery_info.get('address'),
+                    city=delivery_info.get('city'),
+                    postal_code=delivery_info.get('postal_code'),
+                    country=delivery_info.get('country'),
+                    store_pickup=delivery_info.get('store_pickup', False)
+                )
+                
+                # Create order items
+                for item in cart_items:
+                    OrderItem.objects.create(
+                        order=order,
+                        cupcake=item.cupcake,
+                        quantity=item.quantity,
+                        price=item.cupcake.price
+                    )
+                
+                # Clear the cart
+                cart_items.delete()
+                
+                return JsonResponse({
+                    'success': True,
+                    'order_id': order.id,
+                    'message': 'Payment successful! Your order has been placed.'
+                })
             
-            return JsonResponse({'success': False, 'error': 'Payment failed'})
+            return JsonResponse({
+                'success': False, 
+                'error': 'Payment processing failed. Please try again.'
+            })
             
         except stripe.error.CardError as e:
-            return JsonResponse({'success': False, 'error': e.user_message})
+            return JsonResponse({
+                'success': False, 
+                'error': e.user_message or 'Your card was declined. Please try another payment method.'
+            })
+        except Cart.DoesNotExist:
+            return JsonResponse({
+                'success': False,
+                'error': 'Your cart is empty. Please add items before checkout.'
+            })
         except Exception as e:
-            return JsonResponse({'success': False, 'error': str(e)})
+            return JsonResponse({
+                'success': False, 
+                'error': str(e) or 'An unexpected error occurred. Please try again later.'
+            })
     
-    return JsonResponse({'success': False, 'error': 'Invalid request'})
+    return JsonResponse({
+        'success': False, 
+        'error': 'Invalid request method.'
+    })
 
 def order_success(request):
-    return render(request, 'order_success.html')
+    order_id = request.GET.get('order_id')
+    if not order_id:
+        messages.error(request, 'No order specified.')
+        return redirect('home')
+    
+    try:
+        order = Order.objects.get(id=order_id, user=request.user)
+    except Order.DoesNotExist:
+        messages.error(request, 'Order not found.')
+        return redirect('home')
+    
+    return render(request, 'shop/order_success.html', {
+        'order': order,
+        'order_items': order.items.all()
+    })
+
+@login_required
+def my_orders(request):
+    orders = Order.objects.filter(user=request.user).order_by('-created_at')
+    return render(request, 'shop/my_orders.html', {'orders': orders})
+
+@login_required
+def order_detail(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    return render(request, 'shop/order_detail.html', {
+        'order': order,
+        'order_items': order.items.all()
+    })
 
 # -------------------- Home & Shop Views --------------------
 def home(request):
