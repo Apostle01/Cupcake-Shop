@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Payment Status - Cupcake Shop{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="text-center my-4">Payment Status</h1>
+    
+    {% if success %}
+        <div class="alert alert-success text-center">
+            <h2>Payment Successful!</h2>
+            <p>Thank you for your order! Your payment has been processed successfully.</p>
+            <p>Your order will be prepared for {{ order.delivery_method }}.</p>
+            <p>Order ID: <strong>{{ order.id }}</strong></p>
+            <p>You will receive a confirmation email shortly.</p>
+        </div>
+    {% else %}
+        <div class="alert alert-danger text-center">
+            <h2>Payment Failed!</h2>
+            <p>Unfortunately, there was an issue processing your payment.</p>
+            <p>Error: {{ error_message }}</p>
+            <p>Please try again or contact support if the issue persists.</p>
+        </div>
+    {% endif %}
+    
+    <div class="text-center mt-4">
+        <a href="{% url 'shop' %}" class="btn btn-primary">
+            <i class="fa-solid fa-arrow-left"></i> Return to Shop
+        </a>
+    </div>
+</div>
+{% endblock %}
