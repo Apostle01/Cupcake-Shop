@@ -9,9 +9,9 @@
             <h2 class="card-title">Choose a Payment Method</h2>
             <ul class="list-group list-group-flush">
                 <li class="list-group-item">
-                    <a href="{% url 'checkout' %}" class="btn btn-primary w-100">
-                        <i class="fa-solid fa-credit-card"></i> Pay with Credit Card
-                    </a>
+                    <button id="pay-with-card" class="btn btn-primary w-100">
+                        <i class="fa-solid fa-credit-card"></i> Pay with Credit/Debit Card
+                    </button>
                 </li>
                 <li class="list-group-item">
                     <a href="#" class="btn btn-secondary w-100 disabled" aria-label="Pay with Wallet (Coming Soon)" tabindex="-1">
@@ -26,10 +26,66 @@
             </ul>
         </div>
     </div>
+
+    <!-- Card Payment Form -->
+    <div id="card-payment-form" class="mt-4" style="display:none;">
+        <h3>Enter Card Details</h3>
+        <form id="checkout-form" method="POST" action="{% url 'process_checkout' %}">
+            {% csrf_token %}
+            <div class="mb-4">
+                <div id="card-element" class="form-control mb-3"></div>
+                <div id="card-errors" role="alert" class="text-danger mb-3"></div>
+            </div>
+            <div class="d-grid">
+                <button id="submit-payment" class="btn btn-primary btn-lg">
+                    <i class="fas fa-credit-card me-2"></i> Pay Now
+                </button>
+            </div>
+        </form>
+    </div>
+
     <div class="text-center mt-4">
-        <a href="{% url 'view_cart' %}" class="btn btn-outline-secondary">
+        <a href="{% url 'cart' %}" class="btn btn-outline-secondary">
             <i class="fa-solid fa-arrow-left"></i> Back to Cart
         </a>
     </div>
 </div>
+
+<!-- Stripe Script -->
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+    // Initialize Stripe
+    var stripe = Stripe('{{ STRIPE_PUBLIC_KEY }}');
+    var elements = stripe.elements();
+    var cardElement = elements.create('card');
+    cardElement.mount('#card-element');
+
+    // Show card payment form when "Pay with Card" button is clicked
+    document.getElementById('pay-with-card').addEventListener('click', function() {
+        document.getElementById('card-payment-form').style.display = 'block';
+    });
+
+    // Handle form submission
+    var form = document.getElementById('checkout-form');
+    form.addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        stripe.createToken(cardElement).then(function(result) {
+            if (result.error) {
+                // Show error in #card-errors
+                document.getElementById('card-errors').textContent = result.error.message;
+            } else {
+                // Send the token to your server
+                var hiddenInput = document.createElement('input');
+                hiddenInput.setAttribute('type', 'hidden');
+                hiddenInput.setAttribute('name', 'stripeToken');
+                hiddenInput.setAttribute('value', result.token.id);
+                form.appendChild(hiddenInput);
+
+                // Submit the form
+                form.submit();
+            }
+        });
+    });
+</script>
 {% endblock %}
