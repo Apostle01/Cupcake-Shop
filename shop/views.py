@@ -12,6 +12,92 @@ from .models import Category, Order, OrderItem, Cart, CartItem, Cupcake, Product
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
+@login_required
+def process_checkout(request):
+    if request.method == 'POST':
+        stripe_token = request.POST.get('stripeToken')
+
+        if not stripe_token:
+            messages.error(request, 'Something went wrong with the payment. Please try again.')
+            return redirect('payment_options')
+
+        try:
+            # Get the user's cart
+            cart = Cart.objects.get(user=request.user)
+            cart_items = CartItem.objects.filter(cart=cart)
+            total_price = sum(item.cupcake.price * item.quantity for item in cart_items)
+
+            if total_price == 0:
+                messages.warning(request, 'Your cart is empty. Please add items to checkout.')
+                return redirect('view_cart')
+
+            # Create a Stripe charge
+            charge = stripe.Charge.create(
+                amount=int(total_price * 100),  # Convert to cents
+                currency='usd',
+                description='Cupcake Shop Purchase',
+                source=stripe_token,
+                metadata={'user_id': request.user.id}
+            )
+
+            # Create the order
+            order = Order.objects.create(
+                user=request.user,
+                total_price=total_price,
+                stripe_charge_id=charge.id  # Store the Stripe charge ID
+            )
+
+            # Create order items
+            for item in cart_items:
+                OrderItem.objects.create(
+                    order=order,
+                    cupcake=item.cupcake,
+                    quantity=item.quantity,
+                    price=item.cupcake.price
+                )
+
+            # Clear the cart
+            cart_items.delete()
+
+            # Redirect to the order success page with the order ID
+            return redirect('order_success', order_id=order.id)
+
+        except stripe.CardError as e:
+            messages.error(request, f'Card error: {e.user_message}')
+        except stripe.RateLimitError as e:
+            messages.error(request, 'Too many requests to Stripe. Please try again in a few minutes.')
+        except stripe.InvalidRequestError as e:
+            messages.error(request, f'Invalid Stripe request: {e.user_message}')
+        except stripe.AuthenticationError as e:
+            messages.error(request, 'Stripe authentication failed. Please contact support.')
+        except stripe.APIConnectionError as e:
+            messages.error(request, 'Network error communicating with Stripe. Please try again.')
+        except stripe.StripeError as e:
+            messages.error(request, f'Something went wrong with Stripe: {e.user_message}')
+        except Cart.DoesNotExist:
+            messages.error(request, 'Your cart no longer exists.')
+            return redirect('home')
+        except Exception as e:
+            messages.error(request, f'An unexpected error occurred: {str(e)}')
+
+        return redirect('payment_options')  # Redirect back to payment options on error
+    else:
+        return redirect('view_cart') # Redirect to cart if not a POST request
+
+def order_success(request, order_id):
+    """
+    View to display the order success message.
+    """
+    try:
+        order = Order.objects.get(id=order_id, user=request.user)
+        order_items = OrderItem.objects.filter(order=order)
+        return render(request, 'shop/order_success.html', {'order': order, 'order_items': order_items})
+    except Order.DoesNotExist:
+        messages.error(request, 'Order not found.')
+        return redirect('home')
+
+
+
 @csrf_exempt
 def process_payment(request):
     if request.method == 'POST':
