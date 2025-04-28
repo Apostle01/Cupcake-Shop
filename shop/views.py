@@ -1,12 +1,14 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.contrib.auth import login
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 import stripe
 import json
-from .models import Order, OrderItem, Cart, CartItem, Cupcake
+from .models import Category, Order, OrderItem, Cart, CartItem, Cupcake, Product, Review
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
