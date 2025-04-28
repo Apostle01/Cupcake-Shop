@@ -13,6 +13,16 @@ from .models import Category, Order, OrderItem, Cart, CartItem, Cupcake, Product
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 @login_required
+def payment_options(request):
+    """
+    View to display payment options.
+    """
+    return render(request, 'shop/payment_options.html', {
+        'STRIPE_PUBLIC_KEY': settings.STRIPE_PUBLIC_KEY
+    }
+)
+
+@login_required
 def process_checkout(request):
     if request.method == 'POST':
         stripe_token = request.POST.get('stripeToken')
