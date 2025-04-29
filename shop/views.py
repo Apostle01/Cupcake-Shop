@@ -195,3 +195,26 @@ def checkout(request):
 def order_confirmation(request):
     return render(request, 'shop/order_confirmation.html')
 
+def about(request):
+    return render(request, 'shop/about.html')
+
+def contact(request):
+    return render(request, 'shop/contact.html')
+
+@login_required
+def process_checkout(request):
+    return render(request, 'shop/checkout.html')
+
+@login_required
+def payment_options(request):
+    return render(request, 'shop/payment_options.html')
+
+@login_required
+def view_orders(request):
+    orders = Order.objects.filter(user=request.user).order_by('-created_at')
+    return render(request, 'shop/my_orders.html', {'orders': orders})
+
+@login_required
+def add_review(request, cupcake_id):
+    messages.info(request, "Review system is under construction.")
+    return redirect('shop')

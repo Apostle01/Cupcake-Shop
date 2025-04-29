@@ -1,121 +1,97 @@
-{% extends "base.html" %}
-{% block title %}Checkout - Cupcake Shop{% endblock %}
+{% extends 'shop/base.html' %}
+{% load static %}
 
 {% block content %}
-<div class="container">
-    <h1 class="text-center my-4">Checkout</h1>
+<div class="container mt-5">
+  <h2>Checkout</h2>
+  <hr>
+  {% if cart_items %}
+    <ul class="list-group mb-3">
+      {% for item in cart_items %}
+        <li class="list-group-item d-flex justify-content-between lh-sm">
+          <div>
+            <h6 class="my-0">{{ item.cupcake.name }}</h6>
+            <small class="text-muted">Qty: {{ item.quantity }}</small>
+          </div>
+          <span class="text-muted">${{ item.cupcake.price|floatformat:2 }}</span>
+        </li>
+      {% endfor %}
+      <li class="list-group-item d-flex justify-content-between">
+        <strong>Total (USD)</strong>
+        <strong>${{ total_price|floatformat:2 }}</strong>
+      </li>
+    </ul>
 
-    <!-- Payment Status Messages -->
-    <div id="payment-messages" class="alert" style="display:none;"></div>
+    <!-- Payment Form -->
+    <form id="payment-form">
+      <div class="mb-3">
+        <label for="card-element">Credit or debit card</label>
+        <div id="card-element" class="form-control"></div>
+        <div id="card-errors" role="alert" class="text-danger mt-2"></div>
+      </div>
 
-    {% if cart_items %}
-    <h2>Review Your Order</h2>
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>Product</th><th>Quantity</th><th>Unit Price</th><th>Total</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in cart_items %}
-            <tr>
-                <td>{{ item.cupcake.name }}</td>
-                <td>{{ item.quantity }}</td>
-                <td>${{ item.cupcake.price|floatformat:2 }}</td>
-                <td>${{ item.total_price|floatformat:2 }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+      <!-- Delivery Info -->
+      <h5 class="mt-4">Delivery Information</h5>
+      <input class="form-control mt-2" id="address" placeholder="Address" required>
+      <input class="form-control mt-2" id="city" placeholder="City" required>
+      <input class="form-control mt-2" id="postal_code" placeholder="Postal Code" required>
+      <input class="form-control mt-2" id="country" placeholder="Country" required>
+      <div class="form-check mt-3">
+        <input class="form-check-input" type="checkbox" id="store_pickup">
+        <label class="form-check-label" for="store_pickup">
+          Pickup from store
+        </label>
+      </div>
 
-    <p class="text-end fw-bold">Total: ${{ cart_total|floatformat:2 }}</p>
-
-    <!-- Checkout Form -->
-    <form id="checkout-form">
-        {% csrf_token %}
-        <h4>Delivery Address</h4>
-        <input type="text" class="form-control mb-2" name="delivery_address" id="delivery_address" placeholder="Address" required>
-        <input type="text" class="form-control mb-2" name="city" id="city" placeholder="City" required>
-        <input type="text" class="form-control mb-2" name="postal_code" id="postal_code" placeholder="Postal Code" required>
-        <input type="text" class="form-control mb-4" name="country" id="country" placeholder="Country" required>
-
-        <h4>Card Details</h4>
-        <div id="card-element" class="form-control mb-3"></div>
-        <div id="card-errors" role="alert" class="text-danger mb-3"></div>
-
-        <button id="submit-payment" type="submit" class="btn btn-primary btn-lg w-100">
-            <i class="fas fa-credit-card me-2"></i> Pay ${{ cart_total|floatformat:2 }}
-        </button>
+      <button id="submit" class="btn btn-primary mt-4">Pay ${{ total_price|floatformat:2 }}</button>
     </form>
-    {% else %}
-        <div class="alert alert-info text-center">Your cart is empty.</div>
-    {% endif %}
+  {% else %}
+    <p>Your cart is empty.</p>
+  {% endif %}
 </div>
 
-<!-- Stripe JS -->
 <script src="https://js.stripe.com/v3/"></script>
 <script>
-    const stripe = Stripe("{{ STRIPE_PUBLISHABLE_KEY }}");
-    const elements = stripe.elements();
-    const card = elements.create('card');
-    card.mount('#card-element');
+  const stripe = Stripe("{{ stripe_public_key }}");
+  const elements = stripe.elements();
+  const card = elements.create('card');
+  card.mount('#card-element');
 
-    card.on('change', function(event) {
-        const displayError = document.getElementById('card-errors');
-        displayError.textContent = event.error ? event.error.message : '';
-    });
+  const form = document.getElementById('payment-form');
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const { paymentMethod, error } = await stripe.createPaymentMethod('card', card);
 
-    document.getElementById('checkout-form').addEventListener('submit', async function(event) {
-        event.preventDefault();
-
-        const button = document.getElementById('submit-payment');
-        button.disabled = true;
-        button.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status"></span> Processing...`;
-
-        const { paymentMethod, error } = await stripe.createPaymentMethod({
-            type: 'card',
-            card: card,
-        });
-
-        if (error) {
-            document.getElementById('card-errors').textContent = error.message;
-            button.disabled = false;
-            button.innerHTML = '<i class="fas fa-credit-card me-2"></i> Try Again';
-            return;
-        }
-
-        const data = {
-            payment_method_id: paymentMethod.id,
-            amount: Math.round({{ cart_total|floatformat:2 }} * 100),
-            delivery_info: {
-                address: document.getElementById('delivery_address').value,
-                city: document.getElementById('city').value,
-                postal_code: document.getElementById('postal_code').value,
-                country: document.getElementById('country').value,
-            }
-        };
-
-        const response = await fetch("{% url 'process_checkout' %}", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': '{{ csrf_token }}'
-            },
-            body: JSON.stringify(data)
-        });
-
-        const result = await response.json();
-        const messageBox = document.getElementById('payment-messages');
-
-        if (result.success) {
-            window.location.href = `{% url 'order_success' %}?order_id=${result.order_id}`;
+    if (error) {
+      document.getElementById('card-errors').textContent = error.message;
+    } else {
+      fetch("{% url 'create_payment_intent' %}", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": "{{ csrf_token }}"
+        },
+        body: JSON.stringify({
+          payment_method_id: paymentMethod.id,
+          amount: {{ total_price|floatformat:2|floatformat:0|stringformat:"d" }}00,
+          delivery_info: {
+            address: document.getElementById('address').value,
+            city: document.getElementById('city').value,
+            postal_code: document.getElementById('postal_code').value,
+            country: document.getElementById('country').value,
+            store_pickup: document.getElementById('store_pickup').checked
+          }
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          window.location.href = `{% url 'order_success' %}?order_id=${data.order_id}`;
         } else {
-            messageBox.style.display = 'block';
-            messageBox.className = 'alert alert-danger';
-            messageBox.innerHTML = `<strong>Payment Failed:</strong> ${result.error}`;
-            button.disabled = false;
-            button.innerHTML = '<i class="fas fa-credit-card me-2"></i> Try Again';
+          document.getElementById('card-errors').textContent = data.error || 'Payment failed.';
         }
-    });
+      });
+    }
+  });
 </script>
 {% endblock %}

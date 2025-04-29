@@ -7,8 +7,8 @@ urlpatterns = [
     path('', views.home, name='home'),
     path('shop/', views.shop, name='shop'),
     path('category/<slug:slug>/', views.Category, name='Category'),
-    # path('about/', views.about, name='about'),
-    # path('contact/', views.contact, name='contact'),
+    path('about/', views.about, name='about'),
+    path('contact/', views.contact, name='contact'),
     path('create-payment-intent/', create_payment_intent, name='create_payment_intent'),
     path('my-orders/', my_orders, name='my_orders'),
 
@@ -25,17 +25,17 @@ urlpatterns = [
     # -------------------- Checkout & Payment --------------------
     path('checkout/', views.checkout, name='checkout'),
     path('create-payment-intent/', create_payment_intent, name='create_payment_intent'),
-    # path('process-checkout/', views.process_checkout, name='process_checkout'),
+    path('process-checkout/', views.process_checkout, name='process_checkout'),
     path('order-confirmation/', views.order_confirmation, name='order_confirmation'),
     path('order-success/', views.order_success, name='order_success'),
     path('orders/<int:order_id>/', views.order_detail, name='order_detail'),
-    # path('payment-options/', views.payment_options, name='payment_options'),  # Optional
-    # path('process-payment/', views.process_payment, name='process_payment'),  # Optional
+    path('payment-options/', views.payment_options, name='payment_options'),  # Optional
+    path('process-payment/', views.process_payment, name='process_payment'),  # Optional
 
     # -------------------- Order Management --------------------
-    # path('orders/', views.view_orders, name='view_orders'),
+    path('orders/', views.view_orders, name='view_orders'),
     path('orders/<int:order_id>/', views.order_detail, name='order_detail'),
 
     # -------------------- Review System --------------------
-    # path('add-review/<int:cupcake_id>/', views.add_review, name='add_review'),
+    path('add-review/<int:cupcake_id>/', views.add_review, name='add_review'),
 ]
