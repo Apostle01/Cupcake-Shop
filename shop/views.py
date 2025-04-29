@@ -120,7 +120,7 @@ def order_success(request):
 
 # -------------------- Payment --------------------
 @csrf_exempt
-def process_payment(request):
+def create_payment_intent(request):
     if request.method != 'POST':
         return JsonResponse({'success': False, 'error': 'Invalid request method.'})
 
@@ -179,3 +179,19 @@ def process_payment(request):
         return JsonResponse({'success': False, 'error': 'Your cart is empty.'})
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)})
+
+@login_required
+def checkout(request):
+    cart = Cart.objects.filter(user=request.user).first()
+    cart_items = CartItem.objects.filter(cart=cart) if cart else []
+    total_price = sum(item.cupcake.price * item.quantity for item in cart_items)
+    return render(request, 'shop/checkout.html', {
+        'cart_items': cart_items,
+        'total_price': total_price,
+        'stripe_public_key': settings.STRIPE_PUBLISHABLE_KEY
+    })
+
+@login_required
+def order_confirmation(request):
+    return render(request, 'shop/order_confirmation.html')
+
