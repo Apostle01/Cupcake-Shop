@@ -4,204 +4,117 @@
 {% block content %}
 <div class="container">
     <h1 class="text-center my-4">Checkout</h1>
-    
+
     <!-- Payment Status Messages -->
     <div id="payment-messages" class="alert" style="display:none;"></div>
 
-    <!-- Order Review Section -->
-    <h2 class="mb-4">Review Your Order</h2>
     {% if cart_items %}
-    <div class="table-responsive">
-        <table class="table table-bordered">
-            <thead class="thead-dark">
-                <tr>
-                    <th>Product</th>
-                    <th>Quantity</th>
-                    <th>Unit Price</th>
-                    <th>Total</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in cart_items %}
-                <tr>
-                    <td>{{ item.cupcake.name }}</td>
-                    <td>{{ item.quantity }}</td>
-                    <td>${{ item.cupcake.price|floatformat:2 }}</td>
-                    <td>${{ item.total_price|floatformat:2 }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    <p class="text-end fs-5 fw-bold">Total: ${{ cart_total|floatformat:2 }}</p>
+    <h2>Review Your Order</h2>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Product</th><th>Quantity</th><th>Unit Price</th><th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in cart_items %}
+            <tr>
+                <td>{{ item.cupcake.name }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>${{ item.cupcake.price|floatformat:2 }}</td>
+                <td>${{ item.total_price|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
-    <!-- Delivery & Payment Section -->
-    <h2 class="mt-5 mb-4">Delivery & Payment Details</h2>
-    <form id="checkout-form" method="POST" action="{% url 'process_checkout' %}">
+    <p class="text-end fw-bold">Total: ${{ cart_total|floatformat:2 }}</p>
+
+    <!-- Checkout Form -->
+    <form id="checkout-form">
         {% csrf_token %}
-        
-        <!-- Delivery Address -->
-        <div class="mb-4">
-            <h4>Delivery Address</h4>
-            <div class="form-group mb-3">
-                <label for="delivery_address" class="form-label">Address</label>
-                <input type="text" class="form-control" id="delivery_address" name="delivery_address" required>
-            </div>
-            <div class="row">
-                <div class="col-md-6 form-group mb-3">
-                    <label for="city" class="form-label">City</label>
-                    <input type="text" class="form-control" id="city" name="city" required>
-                </div>
-                <div class="col-md-6 form-group mb-3">
-                    <label for="postal_code" class="form-label">Postal Code</label>
-                    <input type="text" class="form-control" id="postal_code" name="postal_code" required>
-                </div>
-            </div>
-            <div class="form-group mb-3">
-                <label for="country" class="form-label">Country</label>
-                <input type="text" class="form-control" id="country" name="country" required>
-            </div>
-        </div>
+        <h4>Delivery Address</h4>
+        <input type="text" class="form-control mb-2" name="delivery_address" id="delivery_address" placeholder="Address" required>
+        <input type="text" class="form-control mb-2" name="city" id="city" placeholder="City" required>
+        <input type="text" class="form-control mb-2" name="postal_code" id="postal_code" placeholder="Postal Code" required>
+        <input type="text" class="form-control mb-4" name="country" id="country" placeholder="Country" required>
 
-        <!-- Payment Section -->
-        <h4>Payment Method</h4>
-        <div class="mb-4">
-            <h5>Pay with Credit/Debit Card</h5>
-            <div id="card-element" class="form-control mb-3"></div>
-            <div id="card-errors" role="alert" class="text-danger mb-3"></div>
-        </div>
+        <h4>Card Details</h4>
+        <div id="card-element" class="form-control mb-3"></div>
+        <div id="card-errors" role="alert" class="text-danger mb-3"></div>
 
-        <div class="d-grid">
-            <button id="submit-payment" class="btn btn-primary btn-lg">
-                <i class="fas fa-credit-card me-2"></i> Pay ${{ cart_total|floatformat:2 }}
-            </button>
-        </div>
+        <button id="submit-payment" type="submit" class="btn btn-primary btn-lg w-100">
+            <i class="fas fa-credit-card me-2"></i> Pay ${{ cart_total|floatformat:2 }}
+        </button>
     </form>
-
-    <div class="text-center mt-4">
-        <h5>Or</h5>
-        <a href="{% url 'payment_options' %}" class="btn btn-secondary">
-            <i class="fa-solid fa-credit-card"></i> Go to Payment Options
-        </a>
-    </div>
-
     {% else %}
-    <div class="alert alert-info text-center">
-        <p>Your cart is empty. <a href="{% url 'shop' %}" class="text-primary">Continue shopping</a>.</p>
-    </div>
+        <div class="alert alert-info text-center">Your cart is empty.</div>
     {% endif %}
 </div>
 
-<!-- Stripe Elements Container -->
-<div id="card-element" class="form-control mb-3" style="display:none;"></div>
-<div id="card-errors" role="alert" class="text-danger mb-3"></div>
-
-<!-- Pay Now Button (initially hidden) -->
-<button id="submit-payment" class="btn btn-success btn-lg" style="display:none;">
-    <i class="fa-solid fa-lock"></i> Pay Now
-</button>
-
-<!-- Stripe Script -->
+<!-- Stripe JS -->
 <script src="https://js.stripe.com/v3/"></script>
 <script>
-    // Initialize Stripe
-    var stripe = Stripe('{{ STRIPE_PUBLIC_KEY }}');
-    var elements = stripe.elements();
-    var cardElement;
+    const stripe = Stripe("{{ STRIPE_PUBLISHABLE_KEY }}");
+    const elements = stripe.elements();
+    const card = elements.create('card');
+    card.mount('#card-element');
 
-    // Show card form when Pay with Card is clicked
-    document.getElementById('card-payment-btn').addEventListener('click', function() {
-        document.getElementById('card-payment-btn').style.display = 'none';
-        document.getElementById('card-element').style.display = 'block';
-        document.getElementById('submit-payment').style.display = 'block';
-        
-        // Create card element if not already created
-        if (!cardElement) {
-            var style = {
-                base: {
-                    color: '#32325d',
-                    fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
-                    fontSize: '16px',
-                    '::placeholder': {
-                        color: '#aab7c4'
-                    }
-                },
-                invalid: {
-                    color: '#fa755a',
-                    iconColor: '#fa755a'
-                }
-            };
-            
-            cardElement = elements.create('card', {style: style});
-            cardElement.mount('#card-element');
-            
-            // Handle real-time validation errors
-            cardElement.on('change', function(event) {
-                var displayError = document.getElementById('card-errors');
-                if (event.error) {
-                    displayError.textContent = event.error.message;
-                } else {
-                    displayError.textContent = '';
-                }
-            });
-        }
+    card.on('change', function(event) {
+        const displayError = document.getElementById('card-errors');
+        displayError.textContent = event.error ? event.error.message : '';
     });
 
-    // Handle form submission
-    const form = document.getElementById('checkout-form');
-    form.addEventListener('submit', async function(event) {
+    document.getElementById('checkout-form').addEventListener('submit', async function(event) {
         event.preventDefault();
-        
-        const submitButton = document.getElementById('submit-payment');
-        submitButton.disabled = true;
-        submitButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Processing...';
 
-        const {paymentMethod, error} = await stripe.createPaymentMethod({
+        const button = document.getElementById('submit-payment');
+        button.disabled = true;
+        button.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status"></span> Processing...`;
+
+        const { paymentMethod, error } = await stripe.createPaymentMethod({
             type: 'card',
             card: card,
         });
 
         if (error) {
             document.getElementById('card-errors').textContent = error.message;
-            submitButton.disabled = false;
-            submitButton.innerHTML = '<i class="fas fa-credit-card me-2"></i> Pay ${{ cart_total|floatformat:2 }}';
+            button.disabled = false;
+            button.innerHTML = '<i class="fas fa-credit-card me-2"></i> Try Again';
             return;
         }
 
-        // Send payment to backend
-        const response = await fetch('{% url "process_payment" %}', {
+        const data = {
+            payment_method_id: paymentMethod.id,
+            amount: Math.round({{ cart_total|floatformat:2 }} * 100),
+            delivery_info: {
+                address: document.getElementById('delivery_address').value,
+                city: document.getElementById('city').value,
+                postal_code: document.getElementById('postal_code').value,
+                country: document.getElementById('country').value,
+            }
+        };
+
+        const response = await fetch("{% url 'process_checkout' %}", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRFToken': '{{ csrf_token }}',
+                'X-CSRFToken': '{{ csrf_token }}'
             },
-            body: JSON.stringify({
-                payment_method_id: paymentMethod.id,
-                amount: Math.round({{ cart_total|floatformat:2 }} * 100), // Convert to cents
-                delivery_info: {
-                    address: document.getElementById('delivery_address').value,
-                    city: document.getElementById('city').value,
-                    postal_code: document.getElementById('postal_code').value,
-                    country: document.getElementById('country').value,
-                    store_pickup: document.getElementById('store_pickup').checked
-                }
-            }),
+            body: JSON.stringify(data)
         });
 
         const result = await response.json();
-        
+        const messageBox = document.getElementById('payment-messages');
+
         if (result.success) {
             window.location.href = `{% url 'order_success' %}?order_id=${result.order_id}`;
         } else {
-            const messageContainer = document.getElementById('payment-messages');
-            messageContainer.style.display = 'block';
-            messageContainer.className = 'alert alert-danger';
-            messageContainer.innerHTML = `
-                <h4><i class="fas fa-exclamation-circle me-2"></i>Payment Failed</h4>
-                <p>${result.error}</p>
-            `;
-            submitButton.disabled = false;
-            submitButton.innerHTML = '<i class="fas fa-credit-card me-2"></i> Try Again';
+            messageBox.style.display = 'block';
+            messageBox.className = 'alert alert-danger';
+            messageBox.innerHTML = `<strong>Payment Failed:</strong> ${result.error}`;
+            button.disabled = false;
+            button.innerHTML = '<i class="fas fa-credit-card me-2"></i> Try Again';
         }
     });
 </script>

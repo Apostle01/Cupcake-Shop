@@ -23,6 +23,8 @@ urlpatterns = [
     path('cart/remove/<int:item_id>/', views.remove_from_cart, name='remove_from_cart'),
 
     # -------------------- Checkout & Payment --------------------
+    path('checkout/', views.checkout_page, name='checkout'),
+    path('create-payment-intent/', views.create_payment_intent, name='create_payment_intent'),
     path('checkout/', views.checkout, name='checkout'),
     path('process-checkout/', views.process_checkout, name='process_checkout'),
     path('payment-options/', views.payment_options, name='payment_options'),
