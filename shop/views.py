@@ -210,6 +210,10 @@ def payment_options(request):
     return render(request, 'shop/payment_options.html')
 
 @login_required
+def process_payment(request):
+    return render(request, 'shop/process_payment.html')
+
+@login_required
 def view_orders(request):
     orders = Order.objects.filter(user=request.user).order_by('-created_at')
     return render(request, 'shop/my_orders.html', {'orders': orders})
