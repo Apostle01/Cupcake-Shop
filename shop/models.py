@@ -62,23 +62,57 @@ class CartItem(models.Model):
     def total_price(self):
         return self.cupcake.price * self.quantity
 
+# from django.db import models
+# from django.contrib.auth.models import User
+# from store.models import Product  # Ensure 'store' app exists and Product model is defined
+
+class ShippingAddress(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    address = models.CharField(max_length=255)
+    city = models.CharField(max_length=100)
+    postal_code = models.CharField(max_length=20)
+    country = models.CharField(max_length=100)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.address}, {self.city}, {self.country}"
 
 class Order(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    shipping_address = models.ForeignKey(ShippingAddress, on_delete=models.SET_NULL, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    total_price = models.DecimalField(max_digits=10, decimal_places=2)
-    stripe_payment_intent_id = models.CharField(max_length=100, unique=True)
-    delivery_address = models.TextField(null=True, blank=True)
-    city = models.CharField(max_length=100, null=True, blank=True)
-    postal_code = models.CharField(max_length=20, null=True, blank=True)
-    country = models.CharField(max_length=100, null=True, blank=True)
-    store_pickup = models.BooleanField(default=False)
+    stripe_payment_intent_id = models.CharField(max_length=255, blank=True, null=True)
+    total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+
+    def __str__(self):
+        return f"Order #{self.id} by {self.user.username}"
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, related_name='items', on_delete=models.CASCADE)
-    cupcake = models.ForeignKey(Cupcake, on_delete=models.PROTECT)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1)
-    price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return f"{self.quantity} x {self.product.name} (${self.price})"
+
+
+# class Order(models.Model):
+#     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+#     created_at = models.DateTimeField(auto_now_add=True)
+#     total_price = models.DecimalField(max_digits=10, decimal_places=2)
+#     stripe_payment_intent_id = models.CharField(max_length=100, unique=True)
+#     delivery_address = models.TextField(null=True, blank=True)
+#     city = models.CharField(max_length=100, null=True, blank=True)
+#     postal_code = models.CharField(max_length=20, null=True, blank=True)
+#     country = models.CharField(max_length=100, null=True, blank=True)
+#     store_pickup = models.BooleanField(default=False)
+
+# class OrderItem(models.Model):
+#     order = models.ForeignKey(Order, related_name='items', on_delete=models.CASCADE)
+#     cupcake = models.ForeignKey(Cupcake, on_delete=models.PROTECT)
+#     quantity = models.PositiveIntegerField(default=1)
+#     price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
 class Review(models.Model):
     cupcake = models.ForeignKey(Cupcake, on_delete=models.CASCADE, related_name="reviews")
