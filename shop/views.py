@@ -12,6 +12,11 @@ from django.urls import reverse
 # from paypal.standard.forms import PayPalPaymentsForm
 from django.conf import settings
 import uuid # unique user id for duplictate orders
+from django.shortcuts import render
+
+def home(request):
+    return render(request, 'home.html')
+
 
 def orders(request, pk):
 	if request.user.is_authenticated and request.user.is_superuser:
