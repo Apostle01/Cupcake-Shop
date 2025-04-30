@@ -4,12 +4,12 @@ from payment.forms import ShippingForm, PaymentForm
 from payment.models import ShippingAddress, Order, OrderItem
 from django.contrib.auth.models import User
 from django.contrib import messages
-from store.models import Product, Profile
+# from store.models import Product, Profile
 import datetime
 
 # Import Some Paypal Stuff
 from django.urls import reverse
-from paypal.standard.forms import PayPalPaymentsForm
+# from paypal.standard.forms import PayPalPaymentsForm
 from django.conf import settings
 import uuid # unique user id for duplictate orders
 
