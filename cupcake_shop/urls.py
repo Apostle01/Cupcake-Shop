@@ -23,7 +23,9 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('shop.urls')),
-    path('accounts/', include('allauth.urls')), 
+    path('accounts/', include('allauth.urls')),
+    # path('admin/', admin.site.urls),
+    # path('', include('your_app_name.urls')),  # replace with the correct app name
 ] 
 
 if settings.DEBUG:
