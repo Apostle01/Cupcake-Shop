@@ -1,4 +1,5 @@
 from django.urls import path
+from . import views
 from payment import views as payment_views
 
 urlpatterns = [
@@ -10,3 +11,4 @@ urlpatterns = [
     path('webhook/', views.stripe_webhook, name='stripe_webhook'),
     path('test-email/', views.test_email_view, name='test_email'),
 ]
+

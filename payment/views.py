@@ -2,11 +2,11 @@ import stripe
 from django.conf import settings
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.core.mail import send_mail
 from django.shortcuts import render
-from django.http import HttpResponse
 from .utils.email import send_order_confirmation_email
+from shop.models import Order
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -92,3 +92,49 @@ def payment_success(request):
 
 def payment_failed(request):
     return render(request, 'payment/payment_failed.html')
+
+@csrf_exempt
+def process_order(request):
+    if request.method == "POST":
+        payload = request.body
+        sig_header = request.META.get('HTTP_STRIPE_SIGNATURE')
+        webhook_secret = settings.STRIPE_WEBHOOK_SECRET
+
+        try:
+            event = stripe.Webhook.construct_event(
+                payload, sig_header, webhook_secret
+            )
+        except (ValueError, stripe.error.SignatureVerificationError):
+            return HttpResponse(status=400)
+
+        # Handle the checkout.session.completed event
+        if event['type'] == 'checkout.session.completed':
+            session = event['data']['object']
+
+            # Create a new order
+            customer_email = session.get("customer_email")
+            amount_total = session.get("amount_total") / 100  # in dollars
+
+            # Save Order to DB (replace with your model)
+            order = Order.objects.create(
+                email=customer_email,
+                amount=amount_total,
+                payment_status="paid",
+                stripe_session_id=session.get("id"),
+            )
+
+            # Send confirmation email
+            subject = "Your Cupcake Shop Order"
+            message = render_to_string('emails/order_confirmation.html', {
+                'order': order,
+            })
+
+            send_mail(
+                subject,
+                '',
+                settings.DEFAULT_FROM_EMAIL,
+                [customer_email],
+                html_message=message,
+            )
+
+        return HttpResponse(status=200)
