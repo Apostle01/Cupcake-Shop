@@ -24,11 +24,11 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('shop.urls')),
     path('accounts/', include('allauth.urls')),
-    # path('admin/', admin.site.urls),
+    path('accounts/', include('django.contrib.auth.urls')), 
     # path('', include('your_app_name.urls')),  # replace with the correct app name
     path('admin/', admin.site.urls),
     path('', include('shop.urls')),  # include your app's URLs
-     path('', include('payment.urls')),
+    path('', include('payment.urls')),
 ] 
 
 if settings.DEBUG:
