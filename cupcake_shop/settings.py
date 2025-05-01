@@ -18,6 +18,11 @@ from decouple import config
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+print("BASE_DIR is:", BASE_DIR)
+STRIPE_WEBHOOK_SECRET = 'whsec_XXXXXXXXXXXXXXXX'
+
+
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
@@ -48,6 +53,14 @@ print("ALLOWED_HOSTS:", ALLOWED_HOSTS)
 print("STRIPE_PUBLIC_KEY:", STRIPE_PUBLIC_KEY)
 print("STRIPE_SECRET_KEY:", STRIPE_SECRET_KEY)
 print("CSRF_TRUSTED_ORIGINS:", CSRF_TRUSTED_ORIGINS)
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'your_email@gmail.com'
+EMAIL_HOST_PASSWORD = 'your_app_password'  # Use an app-specific password
+DEFAULT_FROM_EMAIL = 'Cupcake Shop <your_email@gmail.com>'
 
 # Application definition
 INSTALLED_APPS = [

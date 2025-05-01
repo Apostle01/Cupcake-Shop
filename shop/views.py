@@ -1,3 +1,6 @@
+from django.template.loader import render_to_string
+from django.core.mail import EmailMultiAlternatives
+from django.utils.timezone import now
 from django.shortcuts import render, redirect
 # from cart.cart import Cart
 from payment.forms import ShippingForm, PaymentForm
@@ -279,7 +282,24 @@ def checkout(request):
 		shipping_form = ShippingForm(request.POST or None)
 		return render(request, "payment/checkout.html", {"cart_products":cart_products, "quantities":quantities, "totals":totals, "shipping_form":shipping_form})
 
-	
+def send_order_confirmation_email(email, order_id, customer_name='Customer'):
+    context = {
+        'customer_email': email,
+        'order_id': order_id,
+        'customer_name': customer_name,
+        'current_year': now().year
+    }
+
+    subject = 'Your Cupcake Order Confirmation'
+    from_email = 'no-reply@yourdomain.com'
+    to = [email]
+
+    text_content = f"Thanks for your order, {customer_name}! Your order ID is {order_id}."
+    html_content = render_to_string('emails/order_confirmation.html', context)
+
+    msg = EmailMultiAlternatives(subject, text_content, from_email, to)
+    msg.attach_alternative(html_content, "text/html")
+    msg.send()	
 
 def payment_success(request):
 	return render(request, "payment/payment_success.html", {})
@@ -287,6 +307,23 @@ def payment_success(request):
 
 def payment_failed(request):
 	return render(request, "payment/payment_failed.html", {})
+
+
+def home(request):
+    return render(request, 'home.html')
+
+def about(request):
+    return render(request, 'about.html')
+
+def shop(request):
+    return render(request, 'shop.html')
+
+def contact(request):
+    return render(request, 'contact.html')
+
+def view_orders(request):
+    return render(request, 'orders.html')  # or fetch actual orders
+
 
 # from django.shortcuts import render, redirect, get_object_or_404
 # from django.contrib.auth.decorators import login_required

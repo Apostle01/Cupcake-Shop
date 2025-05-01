@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body { font-family: Arial, sans-serif; color: #333; }
+    .header { background-color: #f8b400; padding: 20px; color: white; text-align: center; }
+    .content { padding: 20px; }
+    .footer { text-align: center; color: #999; font-size: 12px; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Thank You for Your Order!</h1>
+  </div>
+  <div class="content">
+    <p>Hi {{ customer_name|default:"Valued Customer" }},</p>
+    <p>Your order has been received and is being processed. We’ll notify you once it ships.</p>
+    <p><strong>Order Details:</strong></p>
+    <ul>
+      <li>Email: {{ customer_email }}</li>
+      <li>Order ID: {{ order_id }}</li>
+    </ul>
+    <p>We hope you enjoy your cupcakes! 🍰</p>
+  </div>
+  <div class="footer">
+    &copy; {{ current_year }} Cupcake Shop. All rights reserved.
+  </div>
+</body>
+</html>

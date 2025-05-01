@@ -12,6 +12,10 @@ urlpatterns = [
     path('orders/<int:pk>', views.orders, name='orders'),
     # path('paypal', include("paypal.standard.ipn.urls")),
     path('', views.home, name='home'),  # homepage
+    path('about/', views.about, name='about'),
+    path('shop/', views.shop, name='shop'),
+    path('contact/', views.contact, name='contact'),
+    path('orders/', views.view_orders, name='view_orders'),
 
 ]
 

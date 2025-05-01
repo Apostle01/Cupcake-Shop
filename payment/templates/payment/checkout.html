@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Checkout</h2>
+<p>Click below to simulate payment.</p>
+<form action="{% url 'process_order' %}" method="post">
+    {% csrf_token %}
+    <button class="btn btn-success">Pay Now</button>
+</form>
+{% endblock %}
